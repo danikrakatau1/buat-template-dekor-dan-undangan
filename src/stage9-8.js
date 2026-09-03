@@ -9,7 +9,7 @@ let pixi=null, konva=null, auxiliary=null, generation=0, artworkWarmPromise=null
 
 function currentProject(){ return window.weddingEditor?.getProject?.() || window.weddingEngine?.store?.getState?.().project || null; }
 function coverScene(project){ return project?.scenes?.find(scene=>scene.type==='cover') || null; }
-function isFidelity(scene,project){ return Boolean(scene?.fidelity?.system==='hd-vector-layered' || project?.fidelity?.mode==='hd-vector-layered'); }
+function isFidelity(scene,project){ return Boolean(scene?.fidelity?.system==='hd-vector-layered' || project?.fidelity?.mode==='hd-vector-layered' || scene?.fidelity?.system==='auto-artwork-transform' || project?.generator?.mode==='auto-artwork-transform'); }
 function warmArtwork(){ return artworkWarmPromise ||= warmRuntimeEngravingArtwork().catch(error=>{ console.warn('[Stage 9.9.5 Artwork Warmup]',error); return 0; }); }
 function registrySnapshot(){ try{return auditFinalAssetRegistry();}catch(error){console.warn('[Stage 9.9.5 Registry Audit]',error);return null;} }
 
@@ -21,7 +21,7 @@ function ensurePanel(){
   panel=document.createElement('section');
   panel.id='hybrid-renderer-panel';
   panel.className='hybrid-renderer-panel';
-  panel.innerHTML=`<div class="hybrid-head"><div><span>Stage #9.9.5</span><strong>Studio + Pixi Integration Final</strong></div><i data-hybrid-dot></i></div><div class="hybrid-grid"><div><span>Renderer</span><strong data-hybrid-renderer>Booting</strong></div><div><span>Registry</span><strong data-hybrid-registry>Checking</strong></div><div><span>P0 Required</span><strong data-hybrid-p0>-</strong></div><div><span>Promotion</span><strong data-hybrid-promotion>-</strong></div><div><span>Motion</span><strong>GSAP ${HYBRID_RUNTIME_VERSIONS.gsap}</strong></div><div><span>Editor</span><strong>Konva ${HYBRID_RUNTIME_VERSIONS.konva}</strong></div></div><div class="hybrid-note">DOM fallback and Pixi now consume the same Stage #9.9.4 registry contract. Reserved HD production paths are used only after promotion; current engraving runtime artwork remains the safe active source until then.</div>`;
+  panel.innerHTML=`<div class="hybrid-head"><div><span>Stage #9.9.5</span><strong>Studio + Pixi Integration Final</strong></div><i data-hybrid-dot></i></div><div class="hybrid-grid"><div><span>Renderer</span><strong data-hybrid-renderer>Booting</strong></div><div><span>Registry</span><strong data-hybrid-registry>Checking</strong></div><div><span>P0 Required</span><strong data-hybrid-p0>-</strong></div><div><span>Promotion</span><strong data-hybrid-promotion>-</strong></div><div><span>Motion</span><strong>GSAP ${HYBRID_RUNTIME_VERSIONS.gsap}</strong></div><div><span>Editor</span><strong>Konva ${HYBRID_RUNTIME_VERSIONS.konva}</strong></div></div><div class="hybrid-note">Pixi is now a presentation/runtime layer only. Auto Artwork Transform outputs Scene JSON and Pixi animates those generated/curated layers without destructive carving shaders.</div>`;
   anchor.insertAdjacentElement('afterend',panel);
   return panel;
 }
@@ -61,9 +61,9 @@ async function mountHybrid(project=currentProject()){
   }
   const section=document.querySelector(`[data-scene-id="${CSS.escape(scene.id)}"]`);
   if(!section) return;
-  cleanup(); setStatus('loading','Decoding engraving…');
-  await warmArtwork();
-  if(run!==generation) return;
+  cleanup();
+  const isAuto=scene?.fidelity?.system==='auto-artwork-transform';
+  if(!isAuto){ setStatus('loading','Decoding engraving…'); await warmArtwork(); if(run!==generation) return; }
   setStatus('loading','Loading Pixi WebGL…');
   const surface=document.createElement('div'); surface.className='gpu-scene-surface';
   section.prepend(surface);
@@ -78,11 +78,11 @@ async function mountHybrid(project=currentProject()){
     auxiliary=await mountAuxiliaryLayers(scene,section);
     const audit=updateRegistryUI();
     section.dataset.hybridFidelity='ready';
-    section.dataset.artworkOptimization='9.9.5';
+    section.dataset.artworkOptimization=isAuto?'auto-artwork-10.8':'9.9.5';
     section.dataset.assetRegistry=FINAL_ASSET_REGISTRY_VERSION;
     section.dataset.productionPromotionPending=String(audit?.productionPromotionPending?.length || 0);
   }catch(error){
-    console.error('[Stage 9.9.5 Hybrid Renderer]',error);
+    console.error('[Hybrid Renderer]',error);
     surface.remove(); pixi?.destroy(); pixi=null;
     setStatus('warning','DOM fallback active');
   }
@@ -97,5 +97,6 @@ function boot(){
 }
 
 boot();
+import('./stage10-auto-artwork.js').catch(error=>console.error('[Auto Artwork Studio Bootstrap]',error));
 window.addEventListener('beforeunload',cleanup,{once:true});
-console.info('[Wedding Template Studio] Stage #9.9.5 Studio + Pixi Integration Final booting.');
+console.info('[Wedding Template Studio] Hybrid renderer + Auto Artwork bootstrap active.');

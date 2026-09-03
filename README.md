@@ -16,19 +16,30 @@ Private experimental studio for building reusable wedding invitation templates w
 11. Variation System
 12. Export + Production Hardening
 
-## Active post-V1 checkpoint
-**Stage #10.1–#10.8 — Auto Artwork Transform Engine**
+## Stable post-V1 checkpoint
+**Stage #10.10I — Auto Artwork Transform V1 Stable**
 
-The active pipeline now provides:
-- source-image analysis
-- composition resolver and structure locks
-- controlled style presets
-- optional image-transform provider contract
-- deterministic decor injection fallback
-- logical layer normalization
-- artwork quality gate
-- Scene JSON builder
-- Studio upload/preset/QA panel
-- Pixi/GSAP presentation integration
+Final pipeline:
+- source image analysis and composition locks
+- Master Transform Prompt V1 with theme adapters and strict textless-artwork guard
+- Cloudflare Workers AI reference-edit provider path
+- provider output tracing and source-reuse detection
+- generated artwork full-bleed handoff with legacy decor isolation
+- clean DOM typography layer separated from generated artwork
+- output-artwork density analysis after generation
+- automatic Top Copy / Center Copy / Bottom Copy selection
+- CTA density scoring and collision guard
+- responsive portrait / compact / landscape presentation guard
+- Pixi/GSAP presentation integration with Konva editor overlay disabled for final generated covers
+- engine quality gate plus final layout QA score
+- source-preserving fallback when the generative provider is unavailable
 
-A real image-to-image model is intentionally kept behind an external provider boundary. When no provider is connected, the Studio preserves the source image and still performs analysis, composition, decor, layering, QA, Scene JSON generation, and runtime preview without pretending a generative transform occurred.
+The generative provider is never treated as successful merely because the endpoint is reachable. A generated candidate is traced, analyzed again, normalized into Scene JSON, mounted as the final artwork layer, and then independently checked for layout quality before the Studio reports a stable result.
+
+### Stable success indicators
+A successful final run should show:
+- `OUTPUT-AWARE · 10.10I`
+- an output layout such as `top-copy`, `center-copy`, or `bottom-copy`
+- density values for copy and CTA lanes
+- `Final QA` score/status
+- `Auto Artwork Transform V1 stable · output-aware layout ready` when the final QA reaches stable status

@@ -14,12 +14,13 @@
         <div class="brand-mark">W</div>
         <div>
           <strong>Wedding Template Studio</strong>
-          <span>Foundation V1</span>
+          <span>Core Engine V1</span>
         </div>
       </div>
       <div class="topbar-actions">
+        <span id="engine-status" class="engine-status" data-state="loading">Booting</span>
         <button class="ghost-button" type="button">Preview</button>
-        <button class="primary-button" type="button" id="auto-create">Auto Create</button>
+        <button class="primary-button" type="button" id="auto-create">Play Intro</button>
       </div>
     </header>
 
@@ -38,7 +39,7 @@
 
     <main class="canvas-area">
       <div class="canvas-toolbar">
-        <span>Live Preview</span>
+        <span>Live Engine Preview</span>
         <div class="device-switcher">
           <button class="device-button active" data-device="mobile">Mobile</button>
           <button class="device-button" data-device="tablet">Tablet</button>
@@ -48,15 +49,8 @@
 
       <div class="preview-stage">
         <div id="preview-frame" class="preview-frame mobile">
-          <div class="preview-scene">
-            <div class="ambient ambient-one"></div>
-            <div class="ambient ambient-two"></div>
-            <div class="preview-content">
-              <span class="eyebrow">THE WEDDING OF</span>
-              <h1>Anif &amp; Dini</h1>
-              <p>Scene engine foundation is ready.</p>
-              <button type="button">Buka Undangan</button>
-            </div>
+          <div id="engine-root" class="engine-root" aria-live="polite">
+            <div class="engine-loading">Loading scene JSON…</div>
           </div>
         </div>
       </div>
@@ -85,14 +79,14 @@
         </div>
       </div>
       <div class="property-note">
-        Stage #1 focuses on architecture. Scene JSON, renderer, and generator follow in the next stages.
+        Stage #3 makes Scene JSON executable: lifecycle, event bus, state, observer, timeline, and basic renderer are now live.
       </div>
     </aside>
 
     <footer class="timeline-bar">
       <span>Timeline</span>
-      <div class="timeline-track"><i></i></div>
-      <span class="checkpoint">#1 Foundation</span>
+      <div class="timeline-track"><i style="width:25%"></i></div>
+      <span class="checkpoint">#3 Core Engine</span>
     </footer>
   </div>
   <script type="module" src="/src/app.js"></script>

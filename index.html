@@ -12,18 +12,20 @@
   <link rel="stylesheet" href="/src/stage7.css" />
   <link rel="stylesheet" href="/src/stage8.css" />
   <link rel="stylesheet" href="/src/stage9.css" />
+  <link rel="stylesheet" href="/src/stage10.css" />
 </head>
-<body data-theme-pack="jawa-luxury">
+<body data-theme-pack="jawa-luxury" class="studio-editor-mode">
   <div id="app" class="studio-shell">
     <header class="topbar">
       <div class="brand-wrap">
         <div class="brand-mark">W</div>
         <div>
           <strong>Wedding Template Studio</strong>
-          <span>Auto Template Generator V1</span>
+          <span>Visual Editor / Studio V1</span>
         </div>
       </div>
       <div class="topbar-actions">
+        <span class="editor-mode-badge">Editor Live</span>
         <span id="engine-status" class="engine-status" data-state="loading">Booting</span>
         <button class="ghost-button" type="button" id="replay-motion">Replay Motion</button>
         <button class="primary-button" type="button" id="auto-create-template">AUTO CREATE TEMPLATE</button>
@@ -36,17 +38,21 @@
         <nav id="scene-list" class="scene-list"></nav>
       </section>
       <section>
+        <div class="panel-title">Scene Layers</div>
+        <div id="layer-browser" class="layer-browser"></div>
+      </section>
+      <section>
         <div class="panel-title">Library</div>
         <button class="nav-button active">Layers</button>
         <button class="nav-button">Assets</button>
         <button class="nav-button">Presets</button>
-        <div class="asset-library-badge">7 procedural generators · 3 themes · auto scene generation</div>
+        <div class="asset-library-badge">Click any layer in preview to edit it live</div>
       </section>
     </aside>
 
     <main class="canvas-area">
       <div class="canvas-toolbar">
-        <span>Auto Generated Scene JSON · Theme + Seed + Rules → Runnable Template</span>
+        <span>Visual Editor · Click Layer → Edit Content / Position / Size / Motion</span>
         <div class="device-switcher">
           <button class="device-button active" data-device="mobile">Mobile</button>
           <button class="device-button" data-device="tablet">Tablet</button>
@@ -57,30 +63,52 @@
       <div class="preview-stage">
         <div id="preview-frame" class="preview-frame mobile">
           <div id="engine-root" class="engine-root" aria-live="polite">
-            <div class="engine-loading">Preparing auto generator…</div>
+            <div class="engine-loading">Preparing visual editor…</div>
           </div>
         </div>
       </div>
     </main>
 
     <aside class="panel right-panel">
-      <div class="panel-title">Auto Generator</div>
+      <div class="panel-title">Visual Editor</div>
       <div class="property-group">
         <label>Theme</label>
         <select id="preset-select"></select>
       </div>
 
-      <div class="generator-panel">
-        <div class="generator-panel-header">
-          <strong>Generated Template</strong>
-          <i class="generator-status-dot" aria-hidden="true"></i>
+      <div id="editor-empty" class="editor-empty">Pilih layer dari preview atau daftar Scene Layers. Setelah dipilih, properti layer bisa diedit secara realtime.</div>
+
+      <div id="editor-panel" class="editor-panel" hidden>
+        <div class="editor-selection">
+          <span>Selected Layer</span>
+          <strong id="editor-selected-layer">-</strong>
         </div>
+        <div class="editor-fields">
+          <div class="editor-field wide" id="editor-content-field">
+            <label>Content</label>
+            <input id="editor-content" type="text" autocomplete="off" />
+          </div>
+          <div class="editor-field"><label>X %</label><input id="editor-x" type="number" step="0.5" /></div>
+          <div class="editor-field"><label>Y %</label><input id="editor-y" type="number" step="0.5" /></div>
+          <div class="editor-field"><label>Width</label><input id="editor-width" type="text" placeholder="100%" /></div>
+          <div class="editor-field"><label>Opacity</label><input id="editor-opacity" type="number" min="0" max="1" step="0.05" /></div>
+          <div class="editor-field"><label>Scale</label><input id="editor-scale" type="number" min="0.1" max="3" step="0.05" /></div>
+          <div class="editor-field"><label>Rotate</label><input id="editor-rotate" type="number" step="1" /></div>
+          <div class="editor-field wide"><label>Motion</label><select id="editor-motion"><option value="fade-in">fade-in</option><option value="fade-up">fade-up</option><option value="clip-up">clip-up</option><option value="zoom-soft">zoom-soft</option><option value="rise-soft">rise-soft</option></select></div>
+        </div>
+        <div class="editor-actions">
+          <button class="editor-action" id="editor-replay" type="button">Replay Layer</button>
+          <button class="editor-action primary" id="editor-copy-json" type="button">Copy Project JSON</button>
+        </div>
+      </div>
+
+      <div class="generator-panel">
+        <div class="generator-panel-header"><strong>Generator State</strong><i class="generator-status-dot" aria-hidden="true"></i></div>
         <div class="generator-grid">
           <div class="generator-stat"><span>Mode</span><strong id="generator-mode">theme-preview</strong></div>
           <div class="generator-stat"><span>Scenes</span><strong id="generated-scenes">7</strong></div>
           <div class="generator-stat"><span>Layers</span><strong id="generated-layers">-</strong></div>
         </div>
-        <button class="auto-create-button" id="generate-auto-template" type="button" hidden>AUTO CREATE TEMPLATE</button>
       </div>
 
       <div class="variation-panel">
@@ -88,32 +116,16 @@
         <div class="variation-row"><span>Layout</span><strong id="variation-layout">-</strong></div>
         <div class="variation-row"><span>Hero Motion</span><strong id="variation-motion">-</strong></div>
         <div class="variation-row"><span>Atmosphere</span><strong id="variation-atmosphere">-</strong></div>
-        <div class="variation-actions">
-          <button class="variation-button" id="generate-variation" type="button">Generate Cover Variation</button>
-        </div>
+        <div class="variation-actions"><button class="variation-button" id="generate-variation" type="button">Generate Cover Variation</button></div>
       </div>
 
-      <div class="property-group">
-        <label>Generator Pipeline</label>
-        <div class="rule-chip-row">
-          <span class="rule-chip">Theme</span>
-          <span class="rule-chip">Seed</span>
-          <span class="rule-chip">Rules</span>
-          <span class="rule-chip">7 Scenes</span>
-          <span class="rule-chip">Scene JSON</span>
-          <span class="rule-chip">Render</span>
-        </div>
-      </div>
-
-      <div class="property-note">
-        Stage #9 generates a complete runnable template from the selected theme, a fresh deterministic seed, and the Stage #8 rule pools. Cover, Couple, Event, Story, Gallery, RSVP, and Closing are produced as Scene JSON and mounted directly into the same visual engine.
-      </div>
+      <div class="property-note">Stage #10 adds a live editing layer on top of the existing generator. Generated Scene JSON stays the source of truth; the editor mutates that project model and remounts the same renderer instead of creating separate HTML.</div>
     </aside>
 
     <footer class="timeline-bar">
       <span>Timeline</span>
-      <div class="timeline-track"><i style="width:75%"></i></div>
-      <span class="checkpoint">#9 Auto Template Generator</span>
+      <div class="timeline-track"><i style="width:83.33%"></i></div>
+      <span class="checkpoint">#10 Visual Editor / Studio</span>
     </footer>
   </div>
   <script type="module" src="/src/app.js"></script>

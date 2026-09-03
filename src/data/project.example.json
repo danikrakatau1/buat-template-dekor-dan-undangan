@@ -1,0 +1,18 @@
+{
+  "project": {
+    "id": "demo-wedding-template",
+    "name": "Wedding Template Studio Demo",
+    "version": 1,
+    "preset": "jawa-luxury",
+    "seed": "JL-DEMO-001"
+  },
+  "scenes": [
+    { "id": "cover", "type": "cover", "layers": [] },
+    { "id": "couple", "type": "couple", "layers": [] },
+    { "id": "event", "type": "event", "layers": [] },
+    { "id": "story", "type": "story", "layers": [] },
+    { "id": "gallery", "type": "gallery", "layers": [] },
+    { "id": "rsvp", "type": "rsvp", "layers": [] },
+    { "id": "closing", "type": "closing", "layers": [] }
+  ]
+}

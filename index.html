@@ -7,6 +7,7 @@
   <title>Wedding Template Studio</title>
   <link rel="stylesheet" href="/src/styles.css" />
   <link rel="stylesheet" href="/src/stage4.css" />
+  <link rel="stylesheet" href="/src/stage5.css" />
 </head>
 <body>
   <div id="app" class="studio-shell">
@@ -15,13 +16,13 @@
         <div class="brand-mark">W</div>
         <div>
           <strong>Wedding Template Studio</strong>
-          <span>Layer &amp; Scene Engine V1</span>
+          <span>Motion &amp; Decor Engine V1</span>
         </div>
       </div>
       <div class="topbar-actions">
         <span id="engine-status" class="engine-status" data-state="loading">Booting</span>
         <button class="ghost-button" type="button">Preview</button>
-        <button class="primary-button" type="button" id="auto-create">Play Intro</button>
+        <button class="primary-button" type="button" id="auto-create">Replay Motion</button>
       </div>
     </header>
 
@@ -40,7 +41,7 @@
 
     <main class="canvas-area">
       <div class="canvas-toolbar">
-        <span>Live Engine Preview · L0 → L10</span>
+        <span>Live Motion Preview · Parallax + Decor + Timeline</span>
         <div class="device-switcher">
           <button class="device-button active" data-device="mobile">Mobile</button>
           <button class="device-button" data-device="tablet">Tablet</button>
@@ -51,7 +52,7 @@
       <div class="preview-stage">
         <div id="preview-frame" class="preview-frame mobile">
           <div id="engine-root" class="engine-root" aria-live="polite">
-            <div class="engine-loading">Loading layered scenes…</div>
+            <div class="engine-loading">Loading motion engine…</div>
           </div>
         </div>
       </div>
@@ -75,19 +76,19 @@
         <label>Atmosphere</label>
         <div class="chip-row">
           <button class="chip active">Glow</button>
-          <button class="chip">Dust</button>
+          <button class="chip active">Dust</button>
           <button class="chip">Grain</button>
         </div>
       </div>
       <div class="property-note">
-        Stage #4 activates the canonical L0–L10 scene stack: base, dynamic background, decor back, ambient, atmosphere, main decor, media, content, foreground, interaction, and floating UI.
+        Stage #5 adds reusable motion presets, decor float/sway/breathe/drift, depth parallax, upgraded particles, Ken Burns-compatible dynamic backgrounds, and replayable intro motion.
       </div>
     </aside>
 
     <footer class="timeline-bar">
       <span>Timeline</span>
-      <div class="timeline-track"><i style="width:33.33%"></i></div>
-      <span class="checkpoint">#4 Layer &amp; Scene Engine</span>
+      <div class="timeline-track"><i style="width:41.66%"></i></div>
+      <span class="checkpoint">#5 Motion &amp; Decor Engine</span>
     </footer>
   </div>
   <script type="module" src="/src/app.js"></script>

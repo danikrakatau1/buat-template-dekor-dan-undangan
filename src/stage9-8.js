@@ -1,13 +1,15 @@
-import { PixiFidelityRenderer } from './hybrid/pixi-fidelity-renderer.js';
-import { KonvaEditorOverlay } from './hybrid/konva-editor-overlay.js';
-import { mountAuxiliaryLayers } from './hybrid/auxiliary-adapters.js';
-import { HYBRID_RUNTIME_VERSIONS } from './hybrid/runtime-dependencies.js';
+import { PixiFidelityRenderer } from './engine/renderers/hybrid/pixi-fidelity-renderer.js';
+import { KonvaEditorOverlay } from './engine/renderers/hybrid/konva-editor-overlay.js';
+import { mountAuxiliaryLayers } from './engine/renderers/hybrid/auxiliary-adapters.js';
+import { HYBRID_RUNTIME_VERSIONS } from './engine/renderers/hybrid/runtime-dependencies.js';
+import { warmRuntimeEngravingArtwork } from './art-direction/runtime-artwork/runtime-artwork-pack.js';
 
-let pixi=null, konva=null, auxiliary=null, activeSceneId=null, generation=0;
+let pixi=null, konva=null, auxiliary=null, activeSceneId=null, generation=0, artworkWarmPromise=null;
 
 function currentProject(){ return window.weddingEditor?.getProject?.() || window.weddingEngine?.store?.getState?.().project || null; }
 function coverScene(project){ return project?.scenes?.find(scene=>scene.type==='cover') || null; }
 function isFidelity(scene,project){ return Boolean(scene?.fidelity?.system==='hd-vector-layered' || project?.fidelity?.mode==='hd-vector-layered'); }
+function warmArtwork(){ return artworkWarmPromise ||= warmRuntimeEngravingArtwork().catch(error=>{ console.warn('[Stage 9.9.3 Artwork Warmup]',error); return 0; }); }
 
 function ensurePanel(){
   let panel=document.querySelector('#hybrid-renderer-panel');
@@ -17,7 +19,7 @@ function ensurePanel(){
   panel=document.createElement('section');
   panel.id='hybrid-renderer-panel';
   panel.className='hybrid-renderer-panel';
-  panel.innerHTML=`<div class="hybrid-head"><div><span>Stage #9.8</span><strong>Hybrid GPU Renderer</strong></div><i data-hybrid-dot></i></div><div class="hybrid-grid"><div><span>Renderer</span><strong data-hybrid-renderer>Booting</strong></div><div><span>Motion</span><strong>GSAP ${HYBRID_RUNTIME_VERSIONS.gsap}</strong></div><div><span>Editor</span><strong>Konva ${HYBRID_RUNTIME_VERSIONS.konva}</strong></div><div><span>Aux</span><strong>SVG · Lottie · Rive</strong></div></div><div class="hybrid-note">PixiJS renders artwork layers on WebGL. Existing DOM text/buttons remain editable and act as fallback/hit proxies.</div>`;
+  panel.innerHTML=`<div class="hybrid-head"><div><span>Stage #9.9.3</span><strong>Hybrid GPU Renderer</strong></div><i data-hybrid-dot></i></div><div class="hybrid-grid"><div><span>Renderer</span><strong data-hybrid-renderer>Booting</strong></div><div><span>Motion</span><strong>GSAP ${HYBRID_RUNTIME_VERSIONS.gsap}</strong></div><div><span>Editor</span><strong>Konva ${HYBRID_RUNTIME_VERSIONS.konva}</strong></div><div><span>Artwork</span><strong>Engraving · optimized</strong></div></div><div class="hybrid-note">PixiJS renders the engraving artwork on WebGL. Stage #9.9.3 pre-decodes the runtime WebP artwork and uses revocable Blob URLs with DOM fallback retained.</div>`;
   anchor.insertAdjacentElement('afterend',panel);
   return panel;
 }
@@ -43,7 +45,10 @@ async function mountHybrid(project=currentProject()){
   }
   const section=document.querySelector(`[data-scene-id="${CSS.escape(scene.id)}"]`);
   if(!section) return;
-  cleanup(); setStatus('loading','Loading PixiJS…');
+  cleanup(); setStatus('loading','Decoding engraving…');
+  await warmArtwork();
+  if(run!==generation) return;
+  setStatus('loading','Loading PixiJS…');
   const surface=document.createElement('div'); surface.className='gpu-scene-surface';
   section.prepend(surface);
   try{
@@ -56,8 +61,9 @@ async function mountHybrid(project=currentProject()){
     auxiliary=await mountAuxiliaryLayers(scene,section);
     activeSceneId=scene.id;
     section.dataset.hybridFidelity='ready';
+    section.dataset.artworkOptimization='9.9.3';
   }catch(error){
-    console.error('[Stage 9.8 Hybrid Renderer]',error);
+    console.error('[Stage 9.9.3 Hybrid Renderer]',error);
     surface.remove(); pixi?.destroy(); pixi=null;
     setStatus('warning','DOM fallback active');
   }
@@ -65,6 +71,7 @@ async function mountHybrid(project=currentProject()){
 
 function boot(){
   ensurePanel();
+  warmArtwork();
   if(!window.weddingEngine || !window.weddingEditor){ setTimeout(boot,60); return; }
   mountHybrid();
   window.weddingEngine.bus?.on?.('engine:ready',({project})=>requestAnimationFrame(()=>mountHybrid(project)));
@@ -73,4 +80,4 @@ function boot(){
 
 boot();
 window.addEventListener('beforeunload',cleanup,{once:true});
-console.info('[Wedding Template Studio] Stage #9.8 Hybrid GPU Renderer booting.');
+console.info('[Wedding Template Studio] Stage #9.9.3 Cleanup + Export Optimization booting.');

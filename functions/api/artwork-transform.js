@@ -1,5 +1,5 @@
 const PRIMARY_MODEL='@cf/stabilityai/stable-diffusion-xl-base-1.0';
-const FALLBACK_MODEL='@cf/runwayml/stable-diffusion-v1-5-img2img';
+const FALLBACK_MODEL='';
 
 function json(data,status=200,extraHeaders={}){
   return new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store',...extraHeaders}});
@@ -13,12 +13,10 @@ function numberEnv(value,fallback,min,max){
 function modelConfig(env){
   return {
     primary:env.WORKERS_AI_IMAGE_MODEL||PRIMARY_MODEL,
-    fallback:env.WORKERS_AI_FALLBACK_MODEL||FALLBACK_MODEL,
+    fallback:env.WORKERS_AI_FALLBACK_MODEL??FALLBACK_MODEL,
     width:Math.round(numberEnv(env.WORKERS_AI_IMAGE_WIDTH,1024,256,2048)/64)*64,
     height:Math.round(numberEnv(env.WORKERS_AI_IMAGE_HEIGHT,1792,256,2048)/64)*64,
     steps:Math.round(numberEnv(env.WORKERS_AI_IMAGE_STEPS,20,1,20)),
-    // Stage 10.10B: previous .58 preserved too much of the source. Cloudflare documents
-    // lower strength as closer to the input, so use a clearly transformative default.
     strength:numberEnv(env.WORKERS_AI_IMAGE_STRENGTH,.82,0,1),
     guidance:numberEnv(env.WORKERS_AI_IMAGE_GUIDANCE,9,1,20)
   };
@@ -57,10 +55,10 @@ export async function onRequestGet({env}){
     configured,
     provider:'cloudflare-workers-ai',
     model:config.primary,
-    fallbackModel:config.fallback,
+    fallbackModel:config.fallback||'',
     mode:'img2img',
-    generation:{width:config.width,height:config.height,steps:config.steps,strength:config.strength,guidance:config.guidance},
-    revision:'10.10B-strong-transform',
+    generation:{width:config.width,height:config.height,steps:config.steps,strength:config.strength,guidance:config.guidance,inputTransport:'image-byte-array+image_b64'},
+    revision:'10.10D-image-tensor-fix',
     message:configured?'Workers AI binding active':'Add a Workers AI binding named AI to this Cloudflare Pages project'
   });
 }
@@ -88,11 +86,13 @@ export async function onRequestPost({request,env}){
 
   const config=modelConfig(env);
   const sourceBytes=new Uint8Array(await image.arrayBuffer());
+  const imageArray=Array.from(sourceBytes);
   const imageB64=bufferToBase64(sourceBytes.buffer);
   const transformDirective='\n\nTRANSFORMATION INTENSITY DIRECTIVE:\nVisibly redraw the source into genuine antique engraved line art. Replace photographic rendering with etched contour lines, fine cross-hatching, engraved foliage and parchment-print texture while preserving the subject silhouette, landmark identity and composition. The output must be visibly different in rendering technique from the source, not a simple color filter.';
   const input={
     prompt:`${positive}${transformDirective}`,
     negative_prompt:negative,
+    image:imageArray,
     image_b64:imageB64,
     width:config.width,
     height:config.height,
@@ -110,7 +110,7 @@ export async function onRequestPost({request,env}){
   }catch(error){
     primaryError=error?.message||String(error);
     if(!config.fallback||config.fallback===config.primary){
-      return json({error:{code:'workers_ai_error',message:primaryError},provider:'cloudflare-workers-ai',model:config.primary},502);
+      return json({error:{code:'workers_ai_error',message:`Primary gagal: ${primaryError}`},provider:'cloudflare-workers-ai',model:config.primary,revision:'10.10D-image-tensor-fix'},502);
     }
     try{
       model=config.fallback;
@@ -119,7 +119,7 @@ export async function onRequestPost({request,env}){
     }catch(fallbackError){
       return json({
         error:{code:'workers_ai_error',message:`Primary gagal: ${primaryError}. Fallback gagal: ${fallbackError?.message||String(fallbackError)}`},
-        provider:'cloudflare-workers-ai',model:config.primary,fallbackModel:config.fallback
+        provider:'cloudflare-workers-ai',model:config.primary,fallbackModel:config.fallback,revision:'10.10D-image-tensor-fix'
       },502);
     }
   }
@@ -131,14 +131,14 @@ export async function onRequestPost({request,env}){
     ok:true,
     provider:'cloudflare-workers-ai',
     model,
-    fallbackModel:config.fallback,
+    fallbackModel:config.fallback||'',
     fallbackUsed,
-    revision:'10.10B-strong-transform',
+    revision:'10.10D-image-tensor-fix',
     generatedAt:new Date().toISOString(),
     promptVersion,
     preset,
     themeAdapter,
-    generation:{width:config.width,height:config.height,steps:config.steps,strength:config.strength,guidance:config.guidance},
+    generation:{width:config.width,height:config.height,steps:config.steps,strength:config.strength,guidance:config.guidance,inputTransport:'image-byte-array+image_b64'},
     compositeSrc,
     layers:[{id:'ai-transformed-base',role:'background',src:compositeSrc,depth:.02,transparent:false,transform:{x:50,y:50,width:'112%',opacity:1}}]
   });

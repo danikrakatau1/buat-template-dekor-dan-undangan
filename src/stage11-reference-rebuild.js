@@ -16,6 +16,25 @@ function updateHeader(project){
   const header=document.querySelector('.brand-wrap span');if(header)header.textContent=`Reference Native Rebuild · Stage #${STAGE}`;
   const checkpoint=document.querySelector('.checkpoint');if(checkpoint)checkpoint.textContent=`#${STAGE} Visual DNA · Native Reconstruction · Data Binding · Motion · Fidelity QA`;
   const status=document.querySelector('#engine-status');if(status){status.textContent=qa?.status==='locked'?`Reference Locked ${qa.score}`:`Reference QA ${qa?.score??'-'}`;status.dataset.state=qa?.status==='locked'?'ready':'warning';}
+  const sceneCount=document.querySelector('#generated-scenes');if(sceneCount)sceneCount.textContent=String(project?.scenes?.length||0);
+  const layerCount=document.querySelector('#generated-layers');if(layerCount)layerCount.textContent=String((project?.scenes||[]).reduce((n,s)=>n+(s.layers?.length||0),0));
+  const mode=document.querySelector('#generator-mode');if(mode)mode.textContent='reference-native-rebuild';
+}
+
+function syncSceneNavigation(project){
+  const list=document.querySelector('#scene-list');if(!list)return;
+  list.replaceChildren();
+  (project?.scenes||[]).forEach((scene,index)=>{
+    const button=document.createElement('button');button.type='button';button.className=`scene-item${index===0?' active':''}`;button.dataset.sceneTarget=scene.id;
+    const label=scene.type==='opening-motion'?'Opening Motion':scene.type==='save-date'?'Save The Date':scene.type==='wishes'?'Ucapan & Doa':scene.type.charAt(0).toUpperCase()+scene.type.slice(1);
+    button.textContent=`${String(index+1).padStart(2,'0')}  ${label}`;
+    button.addEventListener('click',()=>{
+      list.querySelectorAll('.scene-item').forEach(el=>el.classList.remove('active'));button.classList.add('active');
+      const target=document.querySelector(`[data-scene-id="${CSS.escape(scene.id)}"]`);target?.scrollIntoView?.({behavior:'smooth',block:'start'});activateScene(target);
+      const first=scene.layers?.find(layer=>layer.kind==='text'||layer.kind==='button');if(first)window.weddingEditor?.select?.(scene.id,first.id);
+    });
+    list.appendChild(button);
+  });
 }
 
 function activateScene(section){section?.classList.add('is-active','is-reference-entering');setTimeout(()=>section?.classList.remove('is-reference-entering'),900);}
@@ -53,8 +72,9 @@ function rebuild(project){
     exposeQA(rebuilt);
     window.weddingEditor.setProject(rebuilt);
     window.weddingEngine.mount(rebuilt);
+    window.weddingEditor.clearSelection?.();
     window.weddingEngine.playIntro?.();
-    updateHeader(rebuilt);
+    updateHeader(rebuilt);syncSceneNavigation(rebuilt);
     requestAnimationFrame(()=>installSceneObserver());
     console.info(`[Wedding Template Studio] Stage #${STAGE} reference-native rebuild mounted · ${rebuilt.referenceQA.score}/100.`);
     return true;

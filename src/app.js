@@ -1,5 +1,6 @@
 import { WeddingVisualEngine } from './engine/core/engine.js';
-import { createThemeProject, getThemePackOptions } from './themes/theme-packs.js';
+import { createThemeProject, getThemePackOptions, getThemeSeedPrefix } from './themes/theme-packs.js';
+import { createVariationSeed } from './themes/preset-rules.js';
 
 const scenes = ['Cover','Couple','Event','Story','Gallery','RSVP','Closing'];
 const sceneList = document.querySelector('#scene-list');
@@ -8,9 +9,15 @@ const previewRoot = document.querySelector('#engine-root');
 const replayButton = document.querySelector('#auto-create');
 const statusBadge = document.querySelector('#engine-status');
 const presetSelect = document.querySelector('#preset-select');
+const variationButton = document.querySelector('#generate-variation');
+const seedValue = document.querySelector('#variation-seed');
+const layoutValue = document.querySelector('#variation-layout');
+const motionValue = document.querySelector('#variation-motion');
+const atmosphereValue = document.querySelector('#variation-atmosphere');
 
 const engine = new WeddingVisualEngine({ root: previewRoot });
 window.weddingEngine = engine;
+let currentSeed = 'JL-DEMO-001';
 
 function buildSceneNavigation(){
   sceneList.replaceChildren();
@@ -39,14 +46,35 @@ function fillThemeOptions(){
   }
 }
 
-function mountTheme(themeId){
-  const project = createThemeProject(themeId);
+function updateVariationInspector(project){
+  const variation = project.variation || {};
+  if (seedValue) seedValue.textContent = project.project?.seed || '-';
+  if (layoutValue) layoutValue.textContent = variation.layout || '-';
+  if (motionValue) motionValue.textContent = variation.motion?.hero || '-';
+  if (atmosphereValue) atmosphereValue.textContent = (variation.atmosphere || []).join(' · ') || '-';
+}
+
+function mountTheme(themeId, seed=currentSeed){
+  const project = createThemeProject(themeId, seed);
+  currentSeed = project.project.seed;
   engine.mount(project);
   previewRoot.scrollTop = 0;
   engine.decorMotion?.schedule();
   document.body.dataset.themePack = project.project.preset;
-  statusBadge.textContent = 'Theme Ready';
+  updateVariationInspector(project);
+  statusBadge.textContent = 'Rules Ready';
   statusBadge.dataset.state = 'ready';
+  return project;
+}
+
+function generateVariation(){
+  const prefix = getThemeSeedPrefix(presetSelect.value);
+  const seed = createVariationSeed(prefix);
+  statusBadge.textContent = 'Generating Variant';
+  statusBadge.dataset.state = 'loading';
+  mountTheme(presetSelect.value, seed);
+  variationButton.textContent = 'Variant Generated';
+  setTimeout(() => variationButton.textContent = 'Generate Variation', 1000);
 }
 
 buildSceneNavigation();
@@ -62,10 +90,14 @@ document.querySelectorAll('[data-device]').forEach(button => {
 });
 
 presetSelect.addEventListener('change', () => {
+  const prefix = getThemeSeedPrefix(presetSelect.value);
+  currentSeed = `${prefix}-DEMO-001`;
   statusBadge.textContent = 'Switching Theme';
   statusBadge.dataset.state = 'loading';
-  mountTheme(presetSelect.value);
+  mountTheme(presetSelect.value, currentSeed);
 });
+
+variationButton?.addEventListener('click', generateVariation);
 
 replayButton.addEventListener('click', () => {
   engine.playIntro();
@@ -74,9 +106,9 @@ replayButton.addEventListener('click', () => {
 });
 
 engine.bus.on('engine:ready', ({ project }) => {
-  statusBadge.textContent = 'Theme Ready';
+  statusBadge.textContent = 'Rules Ready';
   statusBadge.dataset.state = 'ready';
-  document.querySelector('.brand-wrap span').textContent = `Theme Packs V1 · ${project.project?.preset || 'custom'}`;
+  document.querySelector('.brand-wrap span').textContent = `Preset Rules V1 · ${project.project?.preset || 'custom'}`;
 });
 
 engine.bus.on('scene:enter', ({ sceneId }) => {
@@ -85,7 +117,7 @@ engine.bus.on('scene:enter', ({ sceneId }) => {
 
 engine.bus.on('timeline:step', step => {
   statusBadge.textContent = step.label || step.action || `Timeline ${step.at || 0}ms`;
-  setTimeout(() => { statusBadge.textContent = 'Theme Ready'; }, 900);
+  setTimeout(() => { statusBadge.textContent = 'Rules Ready'; }, 900);
 });
 
 engine.bus.on('motion:replay', () => {
@@ -94,7 +126,7 @@ engine.bus.on('motion:replay', () => {
 
 try {
   presetSelect.value = 'jawa-luxury';
-  mountTheme('jawa-luxury');
+  mountTheme('jawa-luxury', currentSeed);
 } catch (error) {
   console.error('[Wedding Visual Engine]', error);
   statusBadge.textContent = 'Engine Error';
@@ -102,4 +134,4 @@ try {
   previewRoot.innerHTML = `<div class="engine-error"><strong>Preview gagal dimuat.</strong><span>${error.message}</span></div>`;
 }
 
-console.info('[Wedding Template Studio] Stage #7 Starter Theme Packs booting.');
+console.info('[Wedding Template Studio] Stage #8 Theme & Preset Rules booting.');

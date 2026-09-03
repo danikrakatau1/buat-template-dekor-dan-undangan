@@ -20,9 +20,14 @@ function decodeBase64(base64){
 function webp(...chunks){
   const base64=chunks.join('');
   if(!hasObjectUrl) return `data:image/webp;base64,${base64}`;
-  const url=URL.createObjectURL(new Blob([decodeBase64(base64)],{type:'image/webp'}));
-  runtimeUrls.add(url);
-  return url;
+  try{
+    const url=URL.createObjectURL(new Blob([decodeBase64(base64)],{type:'image/webp'}));
+    runtimeUrls.add(url);
+    return url;
+  }catch(error){
+    console.warn('[Runtime Engraving] Blob decode failed; using data URL fallback.',error);
+    return `data:image/webp;base64,${base64}`;
+  }
 }
 
 export const RUNTIME_ENGRAVING_ARTWORK=Object.freeze({
@@ -38,13 +43,16 @@ export const RUNTIME_ENGRAVING_META=Object.freeze({
 });
 
 export async function warmRuntimeEngravingArtwork(){
+  if(typeof Image==='undefined') return 0;
   const sources=Object.values(RUNTIME_ENGRAVING_ARTWORK);
   await Promise.all(sources.map(src=>new Promise(resolve=>{
     const image=new Image();
     image.decoding='async';
-    image.onload=image.onerror=()=>resolve();
+    let settled=false;
+    const done=()=>{ if(settled) return; settled=true; resolve(); };
+    image.onload=image.onerror=done;
     image.src=src;
-    image.decode?.().then(resolve).catch(()=>{});
+    try{ image.decode?.().then(done).catch(done); }catch{ done(); }
   })));
   return sources.length;
 }

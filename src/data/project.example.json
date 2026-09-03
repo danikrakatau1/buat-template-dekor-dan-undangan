@@ -46,94 +46,70 @@
       },
       "timeline": [
         { "at": 100, "target": "gunungan-main", "action": "reveal" },
+        { "at": 800, "target": "mist-soft", "action": "start" },
         { "at": 1200, "target": "gold-dust", "action": "start" },
         { "at": 1800, "target": "cover-title", "action": "reveal" },
         { "at": 2300, "target": "couple-name", "action": "reveal" }
       ],
       "layers": [
         {
+          "id": "batik-field",
+          "kind": "decor",
+          "role": "decor-back",
+          "asset": { "type": "procedural", "generator": "batik", "variant": "kawung-soft" },
+          "transform": { "opacity": 0.55, "depth": 0.03 },
+          "motion": { "decorMotion": "drift", "parallax": 0.03, "decorDurationMs": 18000 }
+        },
+        {
           "id": "gunungan-main",
           "kind": "decor",
           "role": "decor-main",
-          "asset": {
-            "type": "procedural",
-            "generator": "gunungan",
-            "variant": "royal-center"
-          },
-          "transform": {
-            "x": 50,
-            "y": 56,
-            "width": "74%",
-            "scale": 1,
-            "rotate": 0,
-            "opacity": 1,
-            "depth": 0.12,
-            "z": 50,
-            "anchor": "center"
-          },
-          "motion": {
-            "preset": "rise-soft",
-            "delayMs": 100,
-            "durationMs": 1400,
-            "easing": "premium",
-            "once": true,
-            "parallax": 0.12
-          }
+          "asset": { "type": "procedural", "generator": "gunungan", "variant": "royal-center" },
+          "transform": { "x": 50, "y": 56, "width": "74%", "scale": 1, "rotate": 0, "opacity": 1, "depth": 0.12, "z": 50, "anchor": "center" },
+          "motion": { "preset": "rise-soft", "delayMs": 100, "durationMs": 1400, "easing": "premium", "once": true, "parallax": 0.12, "decorMotion": "float" }
+        },
+        {
+          "id": "mist-soft",
+          "kind": "decor",
+          "role": "ambient",
+          "asset": { "type": "procedural", "generator": "mist" },
+          "transform": { "opacity": 0.38, "depth": 0.05 },
+          "motion": { "parallax": 0.05, "decorMotion": "drift", "decorDurationMs": 13000 }
         },
         {
           "id": "gold-dust",
           "kind": "particle",
           "role": "ambient",
-          "particle": {
-            "type": "gold-dust",
-            "density": 28,
-            "speed": 0.8,
-            "size": 2.2,
-            "opacity": 0.35,
-            "direction": "bottom-right",
-            "wind": 0.12,
-            "color": "#d7ae67",
-            "randomness": 0.8
-          }
+          "particle": { "type": "gold-dust", "density": 28, "speed": 0.8, "size": 2.2, "opacity": 0.35, "direction": "bottom-right", "wind": 0.12, "color": "#d7ae67", "randomness": 0.8 }
         },
         {
           "id": "cover-title",
           "kind": "text",
           "role": "content",
           "content": "The Wedding Of",
-          "motion": {
-            "preset": "clip-up",
-            "delayMs": 1800,
-            "durationMs": 900,
-            "easing": "premium",
-            "once": true
-          }
+          "motion": { "preset": "clip-up", "delayMs": 1800, "durationMs": 900, "easing": "premium", "once": true }
         },
         {
           "id": "couple-name",
           "kind": "text",
           "role": "content",
           "content": "Anif & Dini",
-          "motion": {
-            "preset": "fade-up",
-            "delayMs": 2300,
-            "durationMs": 1000,
-            "easing": "premium",
-            "once": true
-          }
+          "motion": { "preset": "fade-up", "delayMs": 2300, "durationMs": 1000, "easing": "premium", "once": true }
+        },
+        {
+          "id": "ornament-frame",
+          "kind": "decor",
+          "role": "decor-front",
+          "asset": { "type": "procedural", "generator": "ornament-frame" },
+          "transform": { "opacity": 0.62, "depth": 0.2 },
+          "motion": { "preset": "fade-in", "delayMs": 900, "durationMs": 1600, "parallax": 0.08, "decorMotion": "breathe" }
         },
         {
           "id": "open-button",
           "kind": "button",
           "role": "interaction",
           "content": "Buka Undangan",
-          "motion": {
-            "preset": "zoom-soft",
-            "delayMs": 2800,
-            "durationMs": 800,
-            "easing": "premium",
-            "once": true
-          }
+          "motion": { "preset": "zoom-soft", "delayMs": 2800, "durationMs": 800, "easing": "premium", "once": true }
         }
       ],
       "responsive": {

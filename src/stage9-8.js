@@ -63,6 +63,7 @@ async function mountHybrid(project=currentProject()){
   if(!section) return;
   cleanup();
   const isAuto=scene?.fidelity?.system==='auto-artwork-transform';
+  const disableEditorOverlay=Boolean(project?.generator?.disableEditorOverlay || scene?.disableEditorOverlay || scene?.renderHandoff==='10.10G');
   if(!isAuto){ setStatus('loading','Decoding engraving…'); await warmArtwork(); if(run!==generation) return; }
   setStatus('loading','Loading Pixi WebGL…');
   const surface=document.createElement('div'); surface.className='gpu-scene-surface';
@@ -73,12 +74,16 @@ async function mountHybrid(project=currentProject()){
     if(run!==generation){ pixi.destroy(); return; }
     const suffix=result.failed?` · ${result.failed} DOM fallback`:'';
     setStatus(result.failed?'warning':'ready',`Pixi WebGL · ${result.layers} layers${suffix}`);
-    konva=new KonvaEditorOverlay();
-    konva.mount(section).catch(error=>console.warn('[Konva Overlay]',error));
+    if(!disableEditorOverlay){
+      konva=new KonvaEditorOverlay();
+      konva.mount(section).catch(error=>console.warn('[Konva Overlay]',error));
+    }else{
+      section.dataset.editorOverlay='disabled';
+    }
     auxiliary=await mountAuxiliaryLayers(scene,section);
     const audit=updateRegistryUI();
     section.dataset.hybridFidelity='ready';
-    section.dataset.artworkOptimization=isAuto?'auto-artwork-10.8':'9.9.5';
+    section.dataset.artworkOptimization=isAuto?(scene?.renderHandoff==='10.10G'?'auto-artwork-10.10G':'auto-artwork-10.8'):'9.9.5';
     section.dataset.assetRegistry=FINAL_ASSET_REGISTRY_VERSION;
     section.dataset.productionPromotionPending=String(audit?.productionPromotionPending?.length || 0);
   }catch(error){

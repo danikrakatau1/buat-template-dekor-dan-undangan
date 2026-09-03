@@ -9,12 +9,12 @@ export const HD_ASSET_MANIFEST = Object.freeze({
   'landscape-java-engraving-01': vectorAsset('landscape-java-engraving-01','background','engraved-landscape','/assets/art/landscapes/jawa/landscape-java-engraving-01.svg',['jawa-heritage-floral','jawa-luxury','mountain-heritage'],'background'),
   'tree-frame-left-sepia-01': vectorAsset('tree-frame-left-sepia-01','environment-back','tree-frame','/assets/art/nature/trees/tree-frame-left-sepia-01.svg',['jawa-heritage-floral','jawa-luxury','mountain-heritage']),
   'tree-frame-right-sepia-01': vectorAsset('tree-frame-right-sepia-01','environment-back','tree-frame','/assets/art/nature/trees/tree-frame-right-sepia-01.svg',['jawa-heritage-floral','jawa-luxury','mountain-heritage']),
-  'arch-jawa-carved-gold-01': vectorAsset('arch-jawa-carved-gold-01','ornament-back','carved-arch','/assets/art/ornaments/arches/arch-jawa-carved-gold-01.svg',['jawa-heritage-floral','jawa-luxury'],'hero'),
-  'hero-joglo-sepia-01': vectorAsset('hero-joglo-sepia-01','hero','joglo','/assets/art/architecture/joglo/hero-joglo-sepia-01.svg',['jawa-heritage-floral','jawa-luxury','mountain-heritage'],'hero'),
+  'arch-jawa-carved-gold-01': vectorAsset('arch-jawa-carved-gold-01','ornament-back','carved-arch','/assets/art/ornaments/arches/arch-jawa-carved-gold-02.svg',['jawa-heritage-floral','jawa-luxury'],'hero'),
+  'hero-joglo-sepia-01': vectorAsset('hero-joglo-sepia-01','hero','joglo','/assets/art/architecture/joglo/hero-joglo-sepia-02.svg',['jawa-heritage-floral','jawa-luxury','mountain-heritage'],'hero'),
   'orn-gunungan-gold-01': vectorAsset('orn-gunungan-gold-01','ornament-front','gunungan','/assets/art/ornaments/gunungan/orn-gunungan-gold-01.svg',['jawa-heritage-floral','jawa-luxury']),
   'floral-side-left-burgundy-01': vectorAsset('floral-side-left-burgundy-01','ornament-front','floral-side','/assets/art/florals/side/floral-side-left-burgundy-01.svg',['jawa-heritage-floral','jawa-luxury']),
   'floral-side-right-burgundy-01': vectorAsset('floral-side-right-burgundy-01','ornament-front','floral-side','/assets/art/florals/side/floral-side-right-burgundy-01.svg',['jawa-heritage-floral','jawa-luxury']),
-  'floral-bottom-burgundy-01': vectorAsset('floral-bottom-burgundy-01','foreground-floral','floral-bottom','/assets/art/florals/bottom/floral-bottom-burgundy-01.svg',['jawa-heritage-floral','jawa-luxury']),
+  'floral-bottom-burgundy-01': vectorAsset('floral-bottom-burgundy-01','foreground-floral','floral-bottom','/assets/art/florals/bottom/floral-bottom-burgundy-02.svg',['jawa-heritage-floral','jawa-luxury']),
   'overlay-warm-haze-01': vectorAsset('overlay-warm-haze-01','atmosphere-front','haze','/assets/overlays/haze/overlay-warm-haze-01.svg',['jawa-heritage-floral','jawa-luxury','mountain-heritage'],'overlay'),
   'texture-grain-paper-01': vectorAsset('texture-grain-paper-01','ui-fx','grain','/assets/textures/grain/texture-grain-paper-01.svg',['jawa-heritage-floral','jawa-luxury'],'overlay')
 });

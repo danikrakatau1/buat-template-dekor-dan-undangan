@@ -133,7 +133,13 @@ function createDynamicBackground(scene, palette = {}) {
 }
 
 function isGeneratedFinalCover(scene,project){
-  return Boolean(scene?.renderHandoff?.startsWith?.('10.10G') || scene?.fidelity?.handoff?.startsWith?.('generated-safe-ui-10.10G') || project?.generator?.handoff==='10.10G');
+  const handoff=String(scene?.renderHandoff||project?.generator?.handoff||'');
+  const fidelity=String(scene?.fidelity?.handoff||'');
+  return Boolean(
+    project?.generator?.generatedArtworkIsolated ||
+    /^10\.10[GH-I]/.test(handoff) ||
+    /^generated-(?:safe-ui|output-aware)-10\.10[GH-I]/.test(fidelity)
+  );
 }
 
 export class BasicRenderer {
@@ -157,8 +163,10 @@ export class BasicRenderer {
 
     if(isGeneratedFinalCover(scene,project)){
       section.classList.add('auto-generated-cover-handoff','auto-generated-cover-safe-ui');
-      section.dataset.autoArtworkHandoff='10.10G';
+      if(scene?.outputArtworkAnalysis)section.classList.add('auto-generated-cover-output-aware');
+      section.dataset.autoArtworkHandoff=String(scene?.renderHandoff||project?.generator?.handoff||'stable');
       section.dataset.generatedCover='true';
+      section.dataset.safeUiLayout=scene?.safeUILayout?.mode||project?.generator?.safeUILayout||'top-copy';
     }
 
     const palette = project?.theme?.palette || {};

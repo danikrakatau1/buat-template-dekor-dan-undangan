@@ -1,5 +1,7 @@
 const DEFAULT_ENDPOINT='/api/artwork-transform';
 const MAX_REFERENCE_EDGE=511;
+const TEXTLESS_HARD_GUARD=`\n\nABSOLUTELY NO TEXT INSIDE GENERATED ARTWORK.\nNo letters, words, signs, handwriting, calligraphy, typography, labels, logos, pseudo-text or readable characters.\nAll signage and writing surfaces must be blank.\nWedding typography will be added separately by the application.`;
+const TEXTLESS_NEGATIVE='text, typography, letters, words, handwriting, calligraphy, signage, labels, logo, watermark, pseudo-text, readable characters';
 
 function asErrorMessage(payload,status){
   return payload?.error?.message||payload?.message||payload?.error||`Generative provider request failed (${status})`;
@@ -43,19 +45,22 @@ export function createHttpGenerativeProvider({endpoint=DEFAULT_ENDPOINT,name='Cl
     async transform(payload,{signal}={}){
       const prepared=await sourceToFile(payload.source);
       const form=new FormData();
+      const positive=`${payload.prompt?.positive||''}${TEXTLESS_HARD_GUARD}`;
+      const negative=[payload.prompt?.negative||'',TEXTLESS_NEGATIVE].filter(Boolean).join(', ');
       form.append('image',prepared.file,prepared.file.name);
       form.append('reference_width',String(prepared.width));
       form.append('reference_height',String(prepared.height));
       form.append('reference_resized',String(prepared.resized));
-      form.append('prompt',payload.prompt?.positive||'');
-      form.append('negative_prompt',payload.prompt?.negative||'');
+      form.append('prompt',positive);
+      form.append('negative_prompt',negative);
       form.append('prompt_version',payload.promptVersion||payload.prompt?.version||'');
       form.append('theme_adapter',payload.prompt?.themeAdapter||'');
       form.append('preset',payload.preset?.id||'');
       form.append('scene_adapter',JSON.stringify(payload.prompt?.scene||{}));
       form.append('locks',JSON.stringify(payload.locks||{}));
       form.append('output_aspect',payload.output?.aspect||'9:16');
-      form.append('textless',String(payload.output?.textless!==false));
+      form.append('textless','true');
+      form.append('ui_typography_external','true');
 
       const response=await fetch(endpoint,{method:'POST',body:form,headers:{accept:'application/json'},signal,cache:'no-store'});
       const data=await response.json().catch(()=>({}));
@@ -65,7 +70,7 @@ export function createHttpGenerativeProvider({endpoint=DEFAULT_ENDPOINT,name='Cl
         compositeSrc:data.compositeSrc||'',
         layers:Array.isArray(data.layers)?data.layers:[],
         fallback:false,
-        providerMeta:{provider:data.provider||'server',model:data.model||'',fallbackModel:data.fallbackModel||'',fallbackUsed:Boolean(data.fallbackUsed),generation:data.generation||null,revision:data.revision||'',generatedAt:data.generatedAt||'',requestId:data.requestId||'',promptVersion:data.promptVersion||payload.promptVersion,reference:data.reference||null}
+        providerMeta:{provider:data.provider||'server',model:data.model||'',fallbackModel:data.fallbackModel||'',fallbackUsed:Boolean(data.fallbackUsed),generation:data.generation||null,revision:data.revision||'',generatedAt:data.generatedAt||'',requestId:data.requestId||'',promptVersion:data.promptVersion||payload.promptVersion,reference:data.reference||null,textlessGuard:'10.10G'}
       };
     }
   };

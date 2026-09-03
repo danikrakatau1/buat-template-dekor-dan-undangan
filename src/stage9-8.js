@@ -12,6 +12,7 @@ function coverScene(project){ return project?.scenes?.find(scene=>scene.type==='
 function isFidelity(scene,project){ return Boolean(scene?.fidelity?.system==='hd-vector-layered' || project?.fidelity?.mode==='hd-vector-layered' || scene?.fidelity?.system==='auto-artwork-transform' || project?.generator?.mode==='auto-artwork-transform'); }
 function warmArtwork(){ return artworkWarmPromise ||= warmRuntimeEngravingArtwork().catch(error=>{ console.warn('[Stage 9.9.5 Artwork Warmup]',error); return 0; }); }
 function registrySnapshot(){ try{return auditFinalAssetRegistry();}catch(error){console.warn('[Stage 9.9.5 Registry Audit]',error);return null;} }
+function autoHandoff(scene,project){ return String(scene?.renderHandoff || project?.generator?.handoff || ''); }
 
 function ensurePanel(){
   let panel=document.querySelector('#hybrid-renderer-panel');
@@ -21,7 +22,7 @@ function ensurePanel(){
   panel=document.createElement('section');
   panel.id='hybrid-renderer-panel';
   panel.className='hybrid-renderer-panel';
-  panel.innerHTML=`<div class="hybrid-head"><div><span>Stage #9.9.5</span><strong>Studio + Pixi Integration Final</strong></div><i data-hybrid-dot></i></div><div class="hybrid-grid"><div><span>Renderer</span><strong data-hybrid-renderer>Booting</strong></div><div><span>Registry</span><strong data-hybrid-registry>Checking</strong></div><div><span>P0 Required</span><strong data-hybrid-p0>-</strong></div><div><span>Promotion</span><strong data-hybrid-promotion>-</strong></div><div><span>Motion</span><strong>GSAP ${HYBRID_RUNTIME_VERSIONS.gsap}</strong></div><div><span>Editor</span><strong>Konva ${HYBRID_RUNTIME_VERSIONS.konva}</strong></div></div><div class="hybrid-note">Pixi is now a presentation/runtime layer only. Auto Artwork Transform outputs Scene JSON and Pixi animates those generated/curated layers without destructive carving shaders.</div>`;
+  panel.innerHTML=`<div class="hybrid-head"><div><span>Stage #9.9.5</span><strong>Studio + Pixi Integration Final</strong></div><i data-hybrid-dot></i></div><div class="hybrid-grid"><div><span>Renderer</span><strong data-hybrid-renderer>Booting</strong></div><div><span>Registry</span><strong data-hybrid-registry>Checking</strong></div><div><span>P0 Required</span><strong data-hybrid-p0>-</strong></div><div><span>Promotion</span><strong data-hybrid-promotion>-</strong></div><div><span>Motion</span><strong>GSAP ${HYBRID_RUNTIME_VERSIONS.gsap}</strong></div><div><span>Editor</span><strong>Konva ${HYBRID_RUNTIME_VERSIONS.konva}</strong></div></div><div class="hybrid-note">Pixi is presentation/runtime only. Auto Artwork Transform V1 can disable editor overlays and supply an output-aware final cover without destructive shaders.</div>`;
   anchor.insertAdjacentElement('afterend',panel);
   return panel;
 }
@@ -63,7 +64,8 @@ async function mountHybrid(project=currentProject()){
   if(!section) return;
   cleanup();
   const isAuto=scene?.fidelity?.system==='auto-artwork-transform';
-  const disableEditorOverlay=Boolean(project?.generator?.disableEditorOverlay || scene?.disableEditorOverlay || scene?.renderHandoff==='10.10G');
+  const handoff=autoHandoff(scene,project);
+  const disableEditorOverlay=Boolean(project?.generator?.disableEditorOverlay || scene?.disableEditorOverlay || /^10\.10[GH-I]/.test(handoff));
   if(!isAuto){ setStatus('loading','Decoding engraving…'); await warmArtwork(); if(run!==generation) return; }
   setStatus('loading','Loading Pixi WebGL…');
   const surface=document.createElement('div'); surface.className='gpu-scene-surface';
@@ -83,7 +85,7 @@ async function mountHybrid(project=currentProject()){
     auxiliary=await mountAuxiliaryLayers(scene,section);
     const audit=updateRegistryUI();
     section.dataset.hybridFidelity='ready';
-    section.dataset.artworkOptimization=isAuto?(scene?.renderHandoff==='10.10G'?'auto-artwork-10.10G':'auto-artwork-10.8'):'9.9.5';
+    section.dataset.artworkOptimization=isAuto?(handoff?`auto-artwork-${handoff}`:'auto-artwork-runtime'):'9.9.5';
     section.dataset.assetRegistry=FINAL_ASSET_REGISTRY_VERSION;
     section.dataset.productionPromotionPending=String(audit?.productionPromotionPending?.length || 0);
   }catch(error){

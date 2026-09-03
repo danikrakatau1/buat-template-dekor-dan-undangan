@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#080b12" />
   <title>Wedding Template Studio</title>
   <link rel="stylesheet" href="/src/styles.css" />
+  <link rel="stylesheet" href="/src/stage4.css" />
 </head>
 <body>
   <div id="app" class="studio-shell">
@@ -14,7 +15,7 @@
         <div class="brand-mark">W</div>
         <div>
           <strong>Wedding Template Studio</strong>
-          <span>Core Engine V1</span>
+          <span>Layer &amp; Scene Engine V1</span>
         </div>
       </div>
       <div class="topbar-actions">
@@ -39,7 +40,7 @@
 
     <main class="canvas-area">
       <div class="canvas-toolbar">
-        <span>Live Engine Preview</span>
+        <span>Live Engine Preview · L0 → L10</span>
         <div class="device-switcher">
           <button class="device-button active" data-device="mobile">Mobile</button>
           <button class="device-button" data-device="tablet">Tablet</button>
@@ -50,7 +51,7 @@
       <div class="preview-stage">
         <div id="preview-frame" class="preview-frame mobile">
           <div id="engine-root" class="engine-root" aria-live="polite">
-            <div class="engine-loading">Loading scene JSON…</div>
+            <div class="engine-loading">Loading layered scenes…</div>
           </div>
         </div>
       </div>
@@ -79,14 +80,14 @@
         </div>
       </div>
       <div class="property-note">
-        Stage #3 makes Scene JSON executable: lifecycle, event bus, state, observer, timeline, and basic renderer are now live.
+        Stage #4 activates the canonical L0–L10 scene stack: base, dynamic background, decor back, ambient, atmosphere, main decor, media, content, foreground, interaction, and floating UI.
       </div>
     </aside>
 
     <footer class="timeline-bar">
       <span>Timeline</span>
-      <div class="timeline-track"><i style="width:25%"></i></div>
-      <span class="checkpoint">#3 Core Engine</span>
+      <div class="timeline-track"><i style="width:33.33%"></i></div>
+      <span class="checkpoint">#4 Layer &amp; Scene Engine</span>
     </footer>
   </div>
   <script type="module" src="/src/app.js"></script>

@@ -46,4 +46,8 @@ async function mountHybrid(project=currentProject()){
   }catch(error){console.error('[Hybrid Renderer]',error);surface.remove();pixi?.destroy();pixi=null;setStatus('warning','DOM fallback active');}
 }
 function boot(){ensurePanel();updateRegistryUI();warmArtwork();if(!window.weddingEngine || !window.weddingEditor){setTimeout(boot,60);return;}mountHybrid();window.weddingEngine.bus?.on?.('engine:ready',({project})=>requestAnimationFrame(()=>mountHybrid(project)));document.querySelectorAll('[data-device]').forEach(button=>button.addEventListener('click',()=>setTimeout(()=>{if(pixi)pixi.layout();updateRegistryUI();},80)));}
-boot();import('./stage10-auto-artwork.js').catch(error=>console.error('[Auto Artwork Studio Bootstrap]',error));window.addEventListener('beforeunload',cleanup,{once:true});console.info('[Wedding Template Studio] Hybrid renderer + Auto Artwork bootstrap active.');
+boot();
+import('./stage10-auto-artwork.js').catch(error=>console.error('[Auto Artwork Studio Bootstrap]',error));
+import('./stage10-opening-safety.js').catch(error=>console.error('[Auto Artwork Opening Safety]',error));
+window.addEventListener('beforeunload',cleanup,{once:true});
+console.info('[Wedding Template Studio] Hybrid renderer + Auto Artwork bootstrap active.');

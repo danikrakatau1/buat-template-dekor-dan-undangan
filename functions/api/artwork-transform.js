@@ -17,8 +17,10 @@ function modelConfig(env){
     width:Math.round(numberEnv(env.WORKERS_AI_IMAGE_WIDTH,1024,256,2048)/64)*64,
     height:Math.round(numberEnv(env.WORKERS_AI_IMAGE_HEIGHT,1792,256,2048)/64)*64,
     steps:Math.round(numberEnv(env.WORKERS_AI_IMAGE_STEPS,20,1,20)),
-    strength:numberEnv(env.WORKERS_AI_IMAGE_STRENGTH,.58,0,1),
-    guidance:numberEnv(env.WORKERS_AI_IMAGE_GUIDANCE,7.5,1,20)
+    // Stage 10.10B: previous .58 preserved too much of the source. Cloudflare documents
+    // lower strength as closer to the input, so use a clearly transformative default.
+    strength:numberEnv(env.WORKERS_AI_IMAGE_STRENGTH,.82,0,1),
+    guidance:numberEnv(env.WORKERS_AI_IMAGE_GUIDANCE,9,1,20)
   };
 }
 
@@ -57,6 +59,8 @@ export async function onRequestGet({env}){
     model:config.primary,
     fallbackModel:config.fallback,
     mode:'img2img',
+    generation:{width:config.width,height:config.height,steps:config.steps,strength:config.strength,guidance:config.guidance},
+    revision:'10.10B-strong-transform',
     message:configured?'Workers AI binding active':'Add a Workers AI binding named AI to this Cloudflare Pages project'
   });
 }
@@ -85,8 +89,9 @@ export async function onRequestPost({request,env}){
   const config=modelConfig(env);
   const sourceBytes=new Uint8Array(await image.arrayBuffer());
   const imageB64=bufferToBase64(sourceBytes.buffer);
+  const transformDirective='\n\nTRANSFORMATION INTENSITY DIRECTIVE:\nVisibly redraw the source into genuine antique engraved line art. Replace photographic rendering with etched contour lines, fine cross-hatching, engraved foliage and parchment-print texture while preserving the subject silhouette, landmark identity and composition. The output must be visibly different in rendering technique from the source, not a simple color filter.';
   const input={
-    prompt:positive,
+    prompt:`${positive}${transformDirective}`,
     negative_prompt:negative,
     image_b64:imageB64,
     width:config.width,
@@ -128,6 +133,8 @@ export async function onRequestPost({request,env}){
     model,
     fallbackModel:config.fallback,
     fallbackUsed,
+    revision:'10.10B-strong-transform',
+    generatedAt:new Date().toISOString(),
     promptVersion,
     preset,
     themeAdapter,

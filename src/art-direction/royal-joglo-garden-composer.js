@@ -22,30 +22,30 @@ export function composeRoyalJogloGarden({names='Anif & Dini',eyebrow='THE WEDDIN
   const manifest=auditHdManifest(),registry=auditFinalAssetRegistry();
   return {
     id:'cover',type:'cover',preset:'jawa-heritage-floral-royal-joglo-garden',
-    fidelity:{system:'hd-vector-layered',artworkMode:'generated-engraving-raster-v2-clean',composition:'royal-joglo-garden',tuning:'final-asset-registry-v1',seed,manifestReady:manifest.valid,registryReady:registry.contractReady,registryVersion:registry.version,assetIds:[...ROYAL_JOGLO_GARDEN_ASSETS],optimization:{asyncDecode:true,objectUrlTransport:true,alphaEdgeSafe:true,optimizedRaster:manifest.optimizedRaster},productionPromotionPending:registry.productionPromotionPending},
+    fidelity:{system:'hd-vector-layered',artworkMode:'generated-engraving-raster-v2-clean',composition:'royal-joglo-garden',tuning:'final-fidelity-rebalance-v1',seed,manifestReady:manifest.valid,registryReady:registry.contractReady,registryVersion:registry.version,assetIds:[...ROYAL_JOGLO_GARDEN_ASSETS],optimization:{asyncDecode:true,objectUrlTransport:true,alphaEdgeSafe:true,optimizedRaster:manifest.optimizedRaster},productionPromotionPending:registry.productionPromotionPending},
     background:{type:'procedural',transition:'cinematic-crossfade',durationMs:11000,transitionMs:1800,kenBurns:'zoom-in'},
-    atmosphere:{effects:['glow','vignette','grain'],intensity:.11},
+    atmosphere:{effects:['glow','vignette','grain'],intensity:.075},
     timeline:[{at:60,target:'paper-parchment-cream-01',action:'reveal'},{at:180,target:'landscape-java-engraving-01',action:'reveal'},{at:470,target:'arch-jawa-carved-gold-01',action:'reveal'},{at:650,target:'hero-joglo-sepia-01',action:'reveal'},{at:860,target:'orn-gunungan-gold-01',action:'reveal'},{at:1060,target:'cover-title',action:'reveal'},{at:1300,target:'couple-name',action:'reveal'},{at:1660,target:'guest-name',action:'reveal'},{at:2040,target:'open-button',action:'reveal'},{at:2200,target:'floral-bottom-burgundy-01',action:'reveal'}],
     layers:[
       imageLayer('paper-parchment-cream-01','base',{x:50,y:50,width:'116%',opacity:1,depth:0}),
-      imageLayer('landscape-java-engraving-01','background',{x:50,y:50,width:'112%',opacity:.80,depth:.018},{parallax:.018,decorMotion:'drift',decorDurationMs:32000}),
-      imageLayer('tree-frame-left-sepia-01','environment-back',{x:1.5,y:51,width:'40%',opacity:.10,depth:.052},{preset:'fade-right',parallax:.04,decorMotion:'sway',decorDurationMs:25000}),
-      imageLayer('tree-frame-right-sepia-01','environment-back',{x:98.5,y:51,width:'40%',opacity:.10,depth:.052},{preset:'fade-left',parallax:.04,decorMotion:'sway',decorDurationMs:25000}),
-      imageLayer('arch-jawa-carved-gold-01','ornament-back',{x:50,y:6.2,width:'112%',opacity:.82,depth:.078},{preset:'clip-up',parallax:.032}),
-      imageLayer('hero-joglo-sepia-01','hero',{x:50,y:80.5,width:'86%',opacity:.98,depth:.12},{preset:'rise-soft',parallax:.068,decorMotion:'breathe',decorDurationMs:26000}),
-      imageLayer('orn-gunungan-gold-01','ornament-front',{x:50,y:21.7,width:'15%',opacity:.82,depth:.15},{preset:'zoom-soft',parallax:.07,decorMotion:'float',decorDurationMs:16000}),
-      textLayer('cover-title',eyebrow,31.2,'74%','clip-up',1060),textLayer('couple-name',names,37.8,'84%','fade-up',1300),textLayer('guest-kicker','Kepada Bapak/Ibu/Saudara/i',45.3,'72%','fade-up',1510),textLayer('guest-name',guest,48.6,'70%','fade-up',1660),textLayer('guest-place','Di Tempat',51.4,'68%','fade-up',1780),
-      imageLayer('floral-side-left-burgundy-01','ornament-front',{x:2.5,y:47,width:'32%',opacity:.11,depth:.19},{preset:'fade-right',parallax:.07,decorMotion:'sway',decorDurationMs:22000}),
-      imageLayer('floral-side-right-burgundy-01','ornament-front',{x:97.5,y:47,width:'32%',opacity:.11,depth:.19},{preset:'fade-left',parallax:.07,decorMotion:'sway',decorDurationMs:22000}),
-      imageLayer('floral-bottom-burgundy-01','foreground-floral',{x:50,y:92.5,width:'116%',opacity:.99,depth:.27},{preset:'fade-up',parallax:.12,decorMotion:'float',decorDurationMs:24000}),
-      imageLayer('overlay-warm-haze-01','atmosphere-front',{x:50,y:49,width:'122%',opacity:.08,depth:.025},{decorMotion:'drift',decorDurationMs:28000}),
-      {id:'open-button',kind:'button',role:'interaction',content:'Buka Undangan',transform:{x:50,y:58.1},motion:{preset:'zoom-soft',delayMs:2040,durationMs:760,easing:'premium',once:true}},
-      imageLayer('texture-grain-paper-01','ui-fx',{x:50,y:50,width:'114%',opacity:.04,depth:0})
-    ],responsive:{desktop:{parallaxMultiplier:.68},tablet:{parallaxMultiplier:.46},mobile:{parallaxMultiplier:.20}}
+      imageLayer('landscape-java-engraving-01','background',{x:50,y:53,width:'118%',opacity:.92,depth:.018},{parallax:.016,decorMotion:'drift',decorDurationMs:34000}),
+      imageLayer('tree-frame-left-sepia-01','environment-back',{x:1.5,y:52,width:'38%',opacity:.055,depth:.052},{preset:'fade-right',parallax:.028,decorMotion:'sway',decorDurationMs:28000}),
+      imageLayer('tree-frame-right-sepia-01','environment-back',{x:98.5,y:52,width:'38%',opacity:.055,depth:.052},{preset:'fade-left',parallax:.028,decorMotion:'sway',decorDurationMs:28000}),
+      imageLayer('arch-jawa-carved-gold-01','ornament-back',{x:50,y:5.5,width:'108%',opacity:.70,depth:.078},{preset:'clip-up',parallax:.025}),
+      imageLayer('hero-joglo-sepia-01','hero',{x:50,y:86.8,width:'74%',opacity:.94,depth:.12},{preset:'rise-soft',parallax:.050,decorMotion:'breathe',decorDurationMs:28000}),
+      imageLayer('orn-gunungan-gold-01','ornament-front',{x:50,y:20.6,width:'12.5%',opacity:.72,depth:.15},{preset:'zoom-soft',parallax:.05,decorMotion:'float',decorDurationMs:18000}),
+      textLayer('cover-title',eyebrow,29.8,'72%','clip-up',1060),textLayer('couple-name',names,36.0,'82%','fade-up',1300),textLayer('guest-kicker','Kepada Bapak/Ibu/Saudara/i',44.4,'70%','fade-up',1510),textLayer('guest-name',guest,47.5,'68%','fade-up',1660),textLayer('guest-place','Di Tempat',50.2,'66%','fade-up',1780),
+      imageLayer('floral-side-left-burgundy-01','ornament-front',{x:1.5,y:49,width:'28%',opacity:.045,depth:.19},{preset:'fade-right',parallax:.045,decorMotion:'sway',decorDurationMs:26000}),
+      imageLayer('floral-side-right-burgundy-01','ornament-front',{x:98.5,y:49,width:'28%',opacity:.045,depth:.19},{preset:'fade-left',parallax:.045,decorMotion:'sway',decorDurationMs:26000}),
+      imageLayer('floral-bottom-burgundy-01','foreground-floral',{x:50,y:96.4,width:'106%',opacity:.94,depth:.27},{preset:'fade-up',parallax:.075,decorMotion:'float',decorDurationMs:28000}),
+      imageLayer('overlay-warm-haze-01','atmosphere-front',{x:50,y:52,width:'120%',opacity:.035,depth:.025},{decorMotion:'drift',decorDurationMs:32000}),
+      {id:'open-button',kind:'button',role:'interaction',content:'Buka Undangan',transform:{x:50,y:56.4},motion:{preset:'zoom-soft',delayMs:2040,durationMs:760,easing:'premium',once:true}},
+      imageLayer('texture-grain-paper-01','ui-fx',{x:50,y:50,width:'114%',opacity:.026,depth:0})
+    ],responsive:{desktop:{parallaxMultiplier:.62},tablet:{parallaxMultiplier:.40},mobile:{parallaxMultiplier:.16}}
   };
 }
 
 export function createRoyalJogloGardenProject(options={}){
   const seed=options.seed||'RJG-001',manifest=auditHdManifest(),registry=auditFinalAssetRegistry();
-  return {project:{id:`royal-joglo-garden-${String(seed).toLowerCase()}`,name:'Royal Joglo Garden',version:1,preset:'jawa-luxury',seed},theme:{id:'jawa-luxury',palette:{background:'#f1e6ce',surface:'#f8f0df',text:'#76552f',accent:'#a77a42',muted:'#9c7d59'},tokens:{radius:26,motionIntensity:.50,decorIntensity:.74}},variation:{seed,layout:'royal-joglo-garden',heroVariant:'joglo-engraving-raster',backgroundMotion:'zoom-in',motion:{hero:'rise-soft',title:'clip-up',names:'fade-up'},atmosphere:['warm-haze','paper-grain']},fidelity:{mode:'hd-vector-layered',artworkMode:'generated-engraving-raster-v2-clean',composition:'royal-joglo-garden',tuning:'final-asset-registry-v1',manifest,registry},generator:{mode:'fidelity-composer',version:'9.9.4'},audio:{src:'',autoplayAfterOpen:true,loop:true,volume:.72,fadeInMs:1400},scenes:[composeRoyalJogloGarden(options)]};
+  return {project:{id:`royal-joglo-garden-${String(seed).toLowerCase()}`,name:'Royal Joglo Garden',version:1,preset:'jawa-luxury',seed},theme:{id:'jawa-luxury',palette:{background:'#f1e6ce',surface:'#f8f0df',text:'#76552f',accent:'#a77a42',muted:'#9c7d59'},tokens:{radius:26,motionIntensity:.46,decorIntensity:.68}},variation:{seed,layout:'royal-joglo-garden',heroVariant:'joglo-engraving-raster',backgroundMotion:'zoom-in',motion:{hero:'rise-soft',title:'clip-up',names:'fade-up'},atmosphere:['warm-haze','paper-grain']},fidelity:{mode:'hd-vector-layered',artworkMode:'generated-engraving-raster-v2-clean',composition:'royal-joglo-garden',tuning:'final-fidelity-rebalance-v1',manifest,registry},generator:{mode:'fidelity-composer',version:'9.9.6B'},audio:{src:'',autoplayAfterOpen:true,loop:true,volume:.72,fadeInMs:1400},scenes:[composeRoyalJogloGarden(options)]};
 }

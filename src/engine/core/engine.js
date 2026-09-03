@@ -2,6 +2,8 @@ import { EventBus } from './event-bus.js';
 import { EngineStore } from './store.js';
 import { Timeline } from './timeline.js';
 import { createSceneObserver } from './observer.js';
+import { MotionController } from './motion-controller.js';
+import { DecorMotionController } from './decor-motion.js';
 import { BasicRenderer } from '../renderers/basic-renderer.js';
 
 export class WeddingVisualEngine {
@@ -13,6 +15,8 @@ export class WeddingVisualEngine {
     this.store = new EngineStore();
     this.timeline = new Timeline({ reducedMotion: this.store.getState().reducedMotion });
     this.renderer = new BasicRenderer({ root, bus: this.bus, store: this.store });
+    this.motion = new MotionController({ root, store: this.store, bus: this.bus });
+    this.decorMotion = new DecorMotionController({ root, store: this.store, bus: this.bus });
     this.observer = createSceneObserver({
       onEnter: element => this.enterScene(element),
       onLeave: element => this.leaveScene(element)
@@ -39,8 +43,10 @@ export class WeddingVisualEngine {
     });
 
     this.renderer.renderProject(project);
+    this.motion.prepare();
     this.root.querySelectorAll('[data-scene-id]').forEach(scene => this.observer.observe(scene));
     this.bindTimeline(project);
+    this.decorMotion.start();
 
     this.store.setState({ status: 'ready' });
     this.bus.emit('engine:ready', { project });
@@ -54,20 +60,22 @@ export class WeddingVisualEngine {
         this.bus.emit('timeline:step', step);
         if (step.target) {
           const target = this.root.querySelector(`[data-layer-id="${step.target}"]`);
-          target?.classList.add('timeline-active');
+          target?.classList.add('timeline-active', 'is-visible');
         }
       });
     });
   }
 
   playIntro() {
+    const cover = this.root.querySelector('[data-scene-type="cover"]');
+    if (cover) this.motion.replay(cover);
     this.bus.emit('intro:start');
     this.timeline.play();
   }
 
   enterScene(element) {
     element.classList.add('is-active');
-    element.querySelectorAll('[data-motion]').forEach(layer => layer.classList.add('is-visible'));
+    this.motion.revealWithin(element);
     const sceneId = element.dataset.sceneId;
     this.store.setState({ activeSceneId: sceneId });
     this.bus.emit('scene:enter', { sceneId, element });
@@ -80,6 +88,7 @@ export class WeddingVisualEngine {
 
   destroy() {
     this.timeline.cancel();
+    this.decorMotion.destroy();
     this.observer.disconnect();
     this.bus.clear();
     this.root.replaceChildren();

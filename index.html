@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="/src/stage9.css" />
   <link rel="stylesheet" href="/src/stage10.css" />
   <link rel="stylesheet" href="/src/stage11.css" />
+  <link rel="stylesheet" href="/src/stage12.css" />
 </head>
 <body data-theme-pack="jawa-luxury" class="studio-editor-mode">
   <div id="app" class="studio-shell">
@@ -22,11 +23,11 @@
         <div class="brand-mark">W</div>
         <div>
           <strong>Wedding Template Studio</strong>
-          <span>Variation System V1</span>
+          <span>Production Candidate V1</span>
         </div>
       </div>
       <div class="topbar-actions">
-        <span class="editor-mode-badge">Variation Live</span>
+        <span class="editor-mode-badge production-badge">Production</span>
         <span id="engine-status" class="engine-status" data-state="loading">Booting</span>
         <button class="ghost-button" type="button" id="replay-motion">Replay Motion</button>
         <button class="primary-button" type="button" id="auto-create-template">AUTO CREATE TEMPLATE</button>
@@ -47,13 +48,13 @@
         <button class="nav-button active">Layers</button>
         <button class="nav-button">Assets</button>
         <button class="nav-button">Presets</button>
-        <div class="asset-library-badge">Edit first, then create controlled variations without losing locked work</div>
+        <div class="asset-library-badge">Generate → edit → vary → validate → export</div>
       </section>
     </aside>
 
     <main class="canvas-area">
       <div class="canvas-toolbar">
-        <span>Variation System · Regenerate Art Direction While Preserving Manual Edits</span>
+        <span>Production Studio · Validated Scene JSON → Hardened Engine → Runnable Export</span>
         <div class="device-switcher">
           <button class="device-button active" data-device="mobile">Mobile</button>
           <button class="device-button" data-device="tablet">Tablet</button>
@@ -64,17 +65,35 @@
       <div class="preview-stage">
         <div id="preview-frame" class="preview-frame mobile">
           <div id="engine-root" class="engine-root" aria-live="polite">
-            <div class="engine-loading">Preparing variation system…</div>
+            <div class="engine-loading">Preparing production candidate…</div>
           </div>
         </div>
       </div>
     </main>
 
     <aside class="panel right-panel">
-      <div class="panel-title">Variation Studio</div>
+      <div class="panel-title">Production Studio</div>
       <div class="property-group">
         <label>Theme</label>
         <select id="preset-select"></select>
+      </div>
+
+      <div class="production-panel">
+        <div class="production-header">
+          <div><span>Production Check</span><strong id="production-status">Checking…</strong></div>
+          <i id="production-dot" class="production-dot" aria-hidden="true"></i>
+        </div>
+        <div class="production-stats">
+          <div><span>Scenes</span><strong id="production-scenes">-</strong></div>
+          <div><span>Layers</span><strong id="production-layers">-</strong></div>
+          <div><span>Warnings</span><strong id="production-warnings">-</strong></div>
+        </div>
+        <div id="production-message" class="production-message">Validating current project…</div>
+        <div class="production-actions">
+          <button id="validate-production" class="production-action" type="button">VALIDATE</button>
+          <button id="export-project-json" class="production-action" type="button">EXPORT JSON</button>
+          <button id="export-runnable-html" class="production-action primary" type="button">EXPORT RUNNABLE HTML</button>
+        </div>
       </div>
 
       <div class="variation-lock-panel">
@@ -91,7 +110,7 @@
         <div class="variation-history-row"><span>Current</span><strong id="variation-current-seed">-</strong></div>
       </div>
 
-      <div id="editor-empty" class="editor-empty">Pilih layer dari preview atau daftar Scene Layers. Edit dulu, lalu gunakan Variation Locks untuk menentukan apa yang harus dipertahankan saat membuat komposisi baru.</div>
+      <div id="editor-empty" class="editor-empty">Pilih layer dari preview atau daftar Scene Layers. Semua perubahan tetap memakai Scene JSON sebagai source of truth.</div>
 
       <div id="editor-panel" class="editor-panel" hidden>
         <div class="editor-selection"><span>Selected Layer</span><strong id="editor-selected-layer">-</strong></div>
@@ -128,13 +147,13 @@
         <div class="variation-actions"><button class="variation-button" id="generate-variation" type="button">Generate Cover Variation</button></div>
       </div>
 
-      <div class="property-note">Stage #11 adds controlled regeneration. New seeds can refresh layout, decor, motion and atmosphere while selected manual edits are merged back by stable scene/layer IDs.</div>
+      <div class="property-note">Stage #12 adds production validation, lifecycle cleanup, guarded exports, responsive production controls, JSON snapshot export, and a runnable HTML export that uses the hardened engine build.</div>
     </aside>
 
     <footer class="timeline-bar">
       <span>Timeline</span>
-      <div class="timeline-track"><i style="width:91.66%"></i></div>
-      <span class="checkpoint">#11 Variation System</span>
+      <div class="timeline-track"><i style="width:100%"></i></div>
+      <span class="checkpoint">#12 Export + Production Hardening</span>
     </footer>
   </div>
   <script type="module" src="/src/app.js"></script>

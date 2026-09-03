@@ -1,5 +1,13 @@
 import { createJawaFidelityProject, JAWA_FIDELITY_COMPOSITIONS } from './art-direction/jawa-composition-variants.js';
 
+if(!document.querySelector('link[data-stage96]')){
+  const link=document.createElement('link');
+  link.rel='stylesheet';
+  link.href='/src/stage9-6.css';
+  link.dataset.stage96='true';
+  document.head.appendChild(link);
+}
+
 const LABELS = {
   'royal-joglo-garden':'Royal Joglo Garden',
   'carved-arch-heritage':'Carved Arch Heritage',

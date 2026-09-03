@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="/src/stage6.css" />
   <link rel="stylesheet" href="/src/stage7.css" />
   <link rel="stylesheet" href="/src/stage8.css" />
+  <link rel="stylesheet" href="/src/stage9.css" />
 </head>
 <body data-theme-pack="jawa-luxury">
   <div id="app" class="studio-shell">
@@ -19,13 +20,13 @@
         <div class="brand-mark">W</div>
         <div>
           <strong>Wedding Template Studio</strong>
-          <span>Theme &amp; Preset Rules V1</span>
+          <span>Auto Template Generator V1</span>
         </div>
       </div>
       <div class="topbar-actions">
         <span id="engine-status" class="engine-status" data-state="loading">Booting</span>
-        <button class="ghost-button" type="button">Preview</button>
-        <button class="primary-button" type="button" id="auto-create">Replay Motion</button>
+        <button class="ghost-button" type="button" id="replay-motion">Replay Motion</button>
+        <button class="primary-button" type="button" id="auto-create-template">AUTO CREATE TEMPLATE</button>
       </div>
     </header>
 
@@ -39,13 +40,13 @@
         <button class="nav-button active">Layers</button>
         <button class="nav-button">Assets</button>
         <button class="nav-button">Presets</button>
-        <div class="asset-library-badge">7 procedural generators · 3 ruled theme packs</div>
+        <div class="asset-library-badge">7 procedural generators · 3 themes · auto scene generation</div>
       </section>
     </aside>
 
     <main class="canvas-area">
       <div class="canvas-toolbar">
-        <span>Seeded Variation Preview · Same Theme, Different Composition</span>
+        <span>Auto Generated Scene JSON · Theme + Seed + Rules → Runnable Template</span>
         <div class="device-switcher">
           <button class="device-button active" data-device="mobile">Mobile</button>
           <button class="device-button" data-device="tablet">Tablet</button>
@@ -56,17 +57,30 @@
       <div class="preview-stage">
         <div id="preview-frame" class="preview-frame mobile">
           <div id="engine-root" class="engine-root" aria-live="polite">
-            <div class="engine-loading">Resolving preset rules…</div>
+            <div class="engine-loading">Preparing auto generator…</div>
           </div>
         </div>
       </div>
     </main>
 
     <aside class="panel right-panel">
-      <div class="panel-title">Theme &amp; Rules</div>
+      <div class="panel-title">Auto Generator</div>
       <div class="property-group">
-        <label>Preset</label>
+        <label>Theme</label>
         <select id="preset-select"></select>
+      </div>
+
+      <div class="generator-panel">
+        <div class="generator-panel-header">
+          <strong>Generated Template</strong>
+          <i class="generator-status-dot" aria-hidden="true"></i>
+        </div>
+        <div class="generator-grid">
+          <div class="generator-stat"><span>Mode</span><strong id="generator-mode">theme-preview</strong></div>
+          <div class="generator-stat"><span>Scenes</span><strong id="generated-scenes">7</strong></div>
+          <div class="generator-stat"><span>Layers</span><strong id="generated-layers">-</strong></div>
+        </div>
+        <button class="auto-create-button" id="generate-auto-template" type="button" hidden>AUTO CREATE TEMPLATE</button>
       </div>
 
       <div class="variation-panel">
@@ -75,30 +89,31 @@
         <div class="variation-row"><span>Hero Motion</span><strong id="variation-motion">-</strong></div>
         <div class="variation-row"><span>Atmosphere</span><strong id="variation-atmosphere">-</strong></div>
         <div class="variation-actions">
-          <button class="variation-button" id="generate-variation" type="button">Generate Variation</button>
+          <button class="variation-button" id="generate-variation" type="button">Generate Cover Variation</button>
         </div>
       </div>
 
       <div class="property-group">
-        <label>Rule Pools</label>
+        <label>Generator Pipeline</label>
         <div class="rule-chip-row">
-          <span class="rule-chip">Layout Pool</span>
-          <span class="rule-chip">Decor Pool</span>
-          <span class="rule-chip">Motion Pool</span>
-          <span class="rule-chip">Atmosphere Pool</span>
-          <span class="rule-chip">Seeded</span>
+          <span class="rule-chip">Theme</span>
+          <span class="rule-chip">Seed</span>
+          <span class="rule-chip">Rules</span>
+          <span class="rule-chip">7 Scenes</span>
+          <span class="rule-chip">Scene JSON</span>
+          <span class="rule-chip">Render</span>
         </div>
       </div>
 
       <div class="property-note">
-        Stage #8 makes variation deterministic. The same seed reproduces the same layout, decor choices, atmosphere, motion set, depth values, and density. A new seed creates a new composition without leaving the selected art direction.
+        Stage #9 generates a complete runnable template from the selected theme, a fresh deterministic seed, and the Stage #8 rule pools. Cover, Couple, Event, Story, Gallery, RSVP, and Closing are produced as Scene JSON and mounted directly into the same visual engine.
       </div>
     </aside>
 
     <footer class="timeline-bar">
       <span>Timeline</span>
-      <div class="timeline-track"><i style="width:66.66%"></i></div>
-      <span class="checkpoint">#8 Theme / Preset Rules</span>
+      <div class="timeline-track"><i style="width:75%"></i></div>
+      <span class="checkpoint">#9 Auto Template Generator</span>
     </footer>
   </div>
   <script type="module" src="/src/app.js"></script>

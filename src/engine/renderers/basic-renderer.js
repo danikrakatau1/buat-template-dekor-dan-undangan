@@ -132,6 +132,10 @@ function createDynamicBackground(scene, palette = {}) {
   return el;
 }
 
+function isGeneratedFinalCover(scene,project){
+  return Boolean(scene?.renderHandoff?.startsWith?.('10.10G') || scene?.fidelity?.handoff?.startsWith?.('generated-safe-ui-10.10G') || project?.generator?.handoff==='10.10G');
+}
+
 export class BasicRenderer {
   constructor({ root, bus, store }) {
     this.root = root;
@@ -150,6 +154,12 @@ export class BasicRenderer {
     const section = document.createElement('section');
     section.className = `engine-scene scene-${scene.type || 'generic'}`;
     decorateSceneMetadata(section, scene);
+
+    if(isGeneratedFinalCover(scene,project)){
+      section.classList.add('auto-generated-cover-handoff','auto-generated-cover-safe-ui');
+      section.dataset.autoArtworkHandoff='10.10G';
+      section.dataset.generatedCover='true';
+    }
 
     const palette = project?.theme?.palette || {};
     section.style.setProperty('--scene-bg', palette.background || '#120e0b');

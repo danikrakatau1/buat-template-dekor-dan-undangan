@@ -1,0 +1,46 @@
+/* Stage #7 — Starter Theme Packs */
+body[data-theme-pack="jawa-luxury"] .preview-stage{
+  background:radial-gradient(circle at 50% 18%,rgba(185,130,58,.08),transparent 34%),#090d15;
+}
+body[data-theme-pack="ocean-romantic"] .preview-stage{
+  background:radial-gradient(circle at 50% 18%,rgba(71,197,207,.10),transparent 36%),#071017;
+}
+body[data-theme-pack="celestial-night"] .preview-stage{
+  background:radial-gradient(circle at 50% 16%,rgba(139,112,255,.12),transparent 35%),#080916;
+}
+
+body[data-theme-pack="ocean-romantic"] .brand-mark{
+  background:linear-gradient(145deg,#bdf7f4,#3aa6b8);
+  color:#062029;
+}
+body[data-theme-pack="celestial-night"] .brand-mark{
+  background:linear-gradient(145deg,#d9d0ff,#7561d9);
+  color:#100d28;
+}
+
+.procedural-wave svg{overflow:visible}
+.procedural-wave .asset-wave,
+.procedural-wave svg{animation:ocean-bob 8s ease-in-out infinite}
+.procedural-stars svg{animation:star-drift 22s ease-in-out infinite alternate}
+.procedural-stars circle{transform-box:fill-box;transform-origin:center;animation:star-twinkle 4.8s ease-in-out infinite}
+.procedural-stars circle:nth-child(3n){animation-delay:-1.8s}.procedural-stars circle:nth-child(5n){animation-delay:-3.2s}
+.procedural-glow svg{animation:orb-breathe 8s ease-in-out infinite}
+
+body[data-theme-pack="ocean-romantic"] .engine-button{
+  box-shadow:0 10px 34px rgba(87,210,215,.10),inset 0 0 0 1px rgba(255,255,255,.025);
+}
+body[data-theme-pack="celestial-night"] .engine-button{
+  box-shadow:0 10px 38px rgba(155,125,255,.12),inset 0 0 0 1px rgba(255,255,255,.025);
+}
+
+.theme-pack-note{margin-top:10px;padding:10px 11px;border:1px solid var(--border);border-radius:11px;background:rgba(255,255,255,.025);font-size:10px;line-height:1.55;color:var(--muted)}
+.theme-pack-note strong{display:block;color:#d9e0ec;font-size:10px;margin-bottom:3px}
+
+@keyframes ocean-bob{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-8px,0)}}
+@keyframes star-drift{from{transform:translate3d(-3px,3px,0) scale(1)}to{transform:translate3d(5px,-4px,0) scale(1.02)}}
+@keyframes star-twinkle{0%,100%{opacity:.45;transform:scale(.8)}50%{opacity:1;transform:scale(1.35)}}
+@keyframes orb-breathe{0%,100%{opacity:.72;transform:scale(.96)}50%{opacity:1;transform:scale(1.04)}}
+
+@media(prefers-reduced-motion:reduce){
+  .procedural-wave svg,.procedural-stars svg,.procedural-stars circle,.procedural-glow svg{animation:none!important}
+}

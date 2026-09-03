@@ -45,9 +45,9 @@ engine.bus.on('engine:loading', () => {
 });
 
 engine.bus.on('engine:ready', ({ project }) => {
-  statusBadge.textContent = 'Engine Ready';
+  statusBadge.textContent = 'Assets Ready';
   statusBadge.dataset.state = 'ready';
-  document.querySelector('.brand-wrap span').textContent = `Motion & Decor V1 · ${project.project?.preset || 'custom'}`;
+  document.querySelector('.brand-wrap span').textContent = `Procedural Assets V1 · ${project.project?.preset || 'custom'}`;
 });
 
 engine.bus.on('scene:enter', ({ sceneId }) => {
@@ -56,7 +56,7 @@ engine.bus.on('scene:enter', ({ sceneId }) => {
 
 engine.bus.on('timeline:step', step => {
   statusBadge.textContent = step.label || step.action || `Timeline ${step.at || 0}ms`;
-  setTimeout(() => { statusBadge.textContent = 'Engine Ready'; }, 900);
+  setTimeout(() => { statusBadge.textContent = 'Assets Ready'; }, 900);
 });
 
 engine.bus.on('motion:replay', () => {
@@ -70,4 +70,4 @@ engine.load('/src/data/project.example.json').catch(error => {
   previewRoot.innerHTML = `<div class="engine-error"><strong>Preview gagal dimuat.</strong><span>${error.message}</span></div>`;
 });
 
-console.info('[Wedding Template Studio] Stage #5 Motion & Decor Engine booting.');
+console.info('[Wedding Template Studio] Stage #6 Procedural Asset Engine booting.');

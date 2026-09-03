@@ -12,21 +12,34 @@ function percentWidth(value){
   return match ? numeric(match[0],100) : 100;
 }
 function sceneImageLayers(scene){
-  return (scene.layers || []).map((layer,index)=>({layer,index})).filter(item=>item.layer.kind==='image' && (item.layer.asset?.src || item.layer.src)).sort((a,b)=>{
+  return (scene.layers || []).map((layer,index)=>({layer,index})).filter(item=>{
+    const asset=item.layer.asset || {};
+    return item.layer.kind==='image' && (asset.resolvedSrc || asset.src || item.layer.src || asset.fallbackSrc);
+  }).sort((a,b)=>{
     const az=ROLE_ORDER[a.layer.role] ?? 50, bz=ROLE_ORDER[b.layer.role] ?? 50;
     return az===bz ? a.index-b.index : az-bz;
   });
 }
+function sourceCandidates(layer){
+  const asset=layer.asset || {};
+  const list=[];
+  const push=value=>{ if(value && !list.includes(value)) list.push(value); };
+  push(asset.resolvedSrc);
+  if(asset.productionSrc && asset.src===asset.productionSrc) push(asset.productionSrc);
+  push(asset.src || layer.src);
+  push(asset.fallbackSrc);
+  return list;
+}
 
 export class PixiFidelityRenderer {
   constructor(){
-    this.app=null; this.host=null; this.scene=null; this.records=[]; this.resizeObserver=null; this.pointerHandler=null;
-    this.gsap=null; this.PIXI=null; this.pointer={x:0,y:0}; this.frame=0;
+    this.app=null; this.host=null; this.scene=null; this.records=[]; this.failedLayers=[]; this.resizeObserver=null;
+    this.pointerHandler=null; this.pointerLeaveHandler=null; this.gsap=null; this.PIXI=null; this.pointer={x:0,y:0}; this.frame=0;
   }
 
   async mount(scene,host){
     this.destroy();
-    this.scene=scene; this.host=host;
+    this.scene=scene; this.host=host; this.failedLayers=[];
     const [PIXI,gsapModule]=await Promise.all([loadRuntime('pixi'),loadRuntime('gsap')]);
     this.PIXI=PIXI;
     this.gsap=gsapModule.gsap || gsapModule.default || gsapModule;
@@ -43,26 +56,39 @@ export class PixiFidelityRenderer {
     this.resizeObserver=new ResizeObserver(()=>this.layout());
     this.resizeObserver.observe(host);
     host.dataset.gpuRenderer='pixi-webgl';
-    return { layers:this.records.length, backend:'pixi-webgl' };
+    host.dataset.gpuLayers=String(this.records.length);
+    host.dataset.gpuFallbackLayers=String(this.failedLayers.length);
+    return { layers:this.records.length, failed:this.failedLayers.length, failedIds:[...this.failedLayers], backend:'pixi-webgl' };
+  }
+
+  async loadTexture(layer){
+    let lastError=null;
+    for(const src of sourceCandidates(layer)){
+      try{
+        const texture=await this.PIXI.Assets.load(src);
+        if(texture) return {texture,src};
+      }catch(error){ lastError=error; }
+    }
+    throw lastError || new Error(`No usable artwork source for ${layer.id}`);
   }
 
   async addLayer(layer){
-    const src=layer.asset?.src || layer.src;
     try{
-      const texture=await this.PIXI.Assets.load(src);
+      const {texture,src}=await this.loadTexture(layer);
       const anchor=new this.PIXI.Container();
       const sprite=new this.PIXI.Sprite(texture);
       sprite.anchor.set(.5);
       anchor.addChild(sprite);
       anchor.label=layer.id;
       this.app.stage.addChild(anchor);
-      const record={layer,anchor,sprite,baseX:0,baseY:0,baseScale:1};
+      const record={layer,anchor,sprite,source:src,baseX:0,baseY:0,baseScale:1};
       this.records.push(record);
       this.applyMaterial(record);
       this.applyMotion(record);
       const proxy=this.host.querySelector(`[data-layer-id="${CSS.escape(layer.id)}"]`);
-      if(proxy) proxy.classList.add('gpu-backed-proxy');
+      if(proxy){ proxy.classList.add('gpu-backed-proxy'); proxy.dataset.gpuSource=src===layer.asset?.productionSrc?'production':'active'; }
     }catch(error){
+      this.failedLayers.push(layer.id);
       console.warn('[Pixi Fidelity] keeping DOM fallback for',layer.id,error);
     }
   }
@@ -118,11 +144,12 @@ export class PixiFidelityRenderer {
         }
       });
     };
-    this.host.addEventListener('pointermove',this.pointerHandler,{passive:true});
-    this.host.addEventListener('pointerleave',()=>{
+    this.pointerLeaveHandler=()=>{
       this.pointer={x:0,y:0};
       for(const r of this.records){ r.anchor.x=r.baseX; r.anchor.y=r.baseY; }
-    },{passive:true});
+    };
+    this.host.addEventListener('pointermove',this.pointerHandler,{passive:true});
+    this.host.addEventListener('pointerleave',this.pointerLeaveHandler,{passive:true});
   }
 
   destroy(){
@@ -130,8 +157,10 @@ export class PixiFidelityRenderer {
     this.gsap?.killTweensOf?.(this.records.flatMap(r=>[r.sprite,r.sprite?.scale]));
     this.resizeObserver?.disconnect();
     if(this.host && this.pointerHandler) this.host.removeEventListener('pointermove',this.pointerHandler);
-    this.host?.querySelectorAll('.gpu-backed-proxy').forEach(el=>el.classList.remove('gpu-backed-proxy'));
+    if(this.host && this.pointerLeaveHandler) this.host.removeEventListener('pointerleave',this.pointerLeaveHandler);
+    this.host?.querySelectorAll('.gpu-backed-proxy').forEach(el=>{el.classList.remove('gpu-backed-proxy');delete el.dataset.gpuSource;});
     this.app?.destroy?.(true,{children:true,texture:false});
-    this.app=null; this.host=null; this.scene=null; this.records=[]; this.resizeObserver=null; this.pointerHandler=null; this.PIXI=null; this.gsap=null;
+    this.app=null; this.host=null; this.scene=null; this.records=[]; this.failedLayers=[]; this.resizeObserver=null;
+    this.pointerHandler=null; this.pointerLeaveHandler=null; this.PIXI=null; this.gsap=null;
   }
 }

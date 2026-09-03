@@ -1,12 +1,14 @@
 import { WeddingVisualEngine } from './engine/core/engine.js';
 import { createThemeProject, getThemePackOptions, getThemeSeedPrefix } from './themes/theme-packs.js';
 import { createVariationSeed } from './themes/preset-rules.js';
+import { generateAutoTemplate, summarizeGeneratedTemplate } from './generator/auto-template-generator.js';
 
 const scenes = ['Cover','Couple','Event','Story','Gallery','RSVP','Closing'];
 const sceneList = document.querySelector('#scene-list');
 const previewFrame = document.querySelector('#preview-frame');
 const previewRoot = document.querySelector('#engine-root');
-const replayButton = document.querySelector('#auto-create');
+const replayButton = document.querySelector('#replay-motion');
+const autoCreateButton = document.querySelector('#auto-create-template');
 const statusBadge = document.querySelector('#engine-status');
 const presetSelect = document.querySelector('#preset-select');
 const variationButton = document.querySelector('#generate-variation');
@@ -14,10 +16,14 @@ const seedValue = document.querySelector('#variation-seed');
 const layoutValue = document.querySelector('#variation-layout');
 const motionValue = document.querySelector('#variation-motion');
 const atmosphereValue = document.querySelector('#variation-atmosphere');
+const generatedScenesValue = document.querySelector('#generated-scenes');
+const generatedLayersValue = document.querySelector('#generated-layers');
+const generatorModeValue = document.querySelector('#generator-mode');
 
 const engine = new WeddingVisualEngine({ root: previewRoot });
 window.weddingEngine = engine;
 let currentSeed = 'JL-DEMO-001';
+let currentProject = null;
 
 function buildSceneNavigation(){
   sceneList.replaceChildren();
@@ -46,25 +52,33 @@ function fillThemeOptions(){
   }
 }
 
-function updateVariationInspector(project){
+function updateInspector(project){
   const variation = project.variation || {};
+  const summary = summarizeGeneratedTemplate(project);
   if (seedValue) seedValue.textContent = project.project?.seed || '-';
   if (layoutValue) layoutValue.textContent = variation.layout || '-';
   if (motionValue) motionValue.textContent = variation.motion?.hero || '-';
   if (atmosphereValue) atmosphereValue.textContent = (variation.atmosphere || []).join(' · ') || '-';
+  if (generatedScenesValue) generatedScenesValue.textContent = String(summary.scenes);
+  if (generatedLayersValue) generatedLayersValue.textContent = String(summary.layers);
+  if (generatorModeValue) generatorModeValue.textContent = project.generator?.mode || 'theme-preview';
 }
 
-function mountTheme(themeId, seed=currentSeed){
-  const project = createThemeProject(themeId, seed);
+function mountProject(project, status='Generator Ready'){
+  currentProject = project;
   currentSeed = project.project.seed;
   engine.mount(project);
   previewRoot.scrollTop = 0;
   engine.decorMotion?.schedule();
   document.body.dataset.themePack = project.project.preset;
-  updateVariationInspector(project);
-  statusBadge.textContent = 'Rules Ready';
+  updateInspector(project);
+  statusBadge.textContent = status;
   statusBadge.dataset.state = 'ready';
   return project;
+}
+
+function mountTheme(themeId, seed=currentSeed){
+  return mountProject(createThemeProject(themeId, seed), 'Rules Ready');
 }
 
 function generateVariation(){
@@ -75,6 +89,28 @@ function generateVariation(){
   mountTheme(presetSelect.value, seed);
   variationButton.textContent = 'Variant Generated';
   setTimeout(() => variationButton.textContent = 'Generate Variation', 1000);
+}
+
+function autoCreateTemplate(){
+  const prefix = getThemeSeedPrefix(presetSelect.value);
+  const seed = createVariationSeed(prefix);
+  statusBadge.textContent = 'Auto Creating';
+  statusBadge.dataset.state = 'loading';
+  autoCreateButton.disabled = true;
+  autoCreateButton.textContent = 'Generating…';
+
+  try {
+    const project = generateAutoTemplate({ themeId:presetSelect.value, seed });
+    mountProject(project, 'Template Generated');
+    autoCreateButton.textContent = 'AUTO CREATE TEMPLATE';
+    engine.playIntro();
+  } catch (error) {
+    console.error('[Auto Template Generator]', error);
+    statusBadge.textContent = 'Generator Error';
+    statusBadge.dataset.state = 'error';
+  } finally {
+    autoCreateButton.disabled = false;
+  }
 }
 
 buildSceneNavigation();
@@ -98,17 +134,21 @@ presetSelect.addEventListener('change', () => {
 });
 
 variationButton?.addEventListener('click', generateVariation);
+autoCreateButton?.addEventListener('click', autoCreateTemplate);
 
-replayButton.addEventListener('click', () => {
+replayButton?.addEventListener('click', () => {
   engine.playIntro();
   replayButton.textContent = 'Replaying…';
   setTimeout(() => replayButton.textContent = 'Replay Motion', 1400);
 });
 
 engine.bus.on('engine:ready', ({ project }) => {
-  statusBadge.textContent = 'Rules Ready';
+  const generated = project.generator?.mode === 'auto-create';
+  statusBadge.textContent = generated ? 'Template Generated' : 'Rules Ready';
   statusBadge.dataset.state = 'ready';
-  document.querySelector('.brand-wrap span').textContent = `Preset Rules V1 · ${project.project?.preset || 'custom'}`;
+  document.querySelector('.brand-wrap span').textContent = generated
+    ? `Auto Generator V1 · ${project.project?.preset || 'custom'}`
+    : `Auto Generator Ready · ${project.project?.preset || 'custom'}`;
 });
 
 engine.bus.on('scene:enter', ({ sceneId }) => {
@@ -117,11 +157,9 @@ engine.bus.on('scene:enter', ({ sceneId }) => {
 
 engine.bus.on('timeline:step', step => {
   statusBadge.textContent = step.label || step.action || `Timeline ${step.at || 0}ms`;
-  setTimeout(() => { statusBadge.textContent = 'Rules Ready'; }, 900);
-});
-
-engine.bus.on('motion:replay', () => {
-  statusBadge.textContent = 'Motion Replay';
+  setTimeout(() => {
+    statusBadge.textContent = currentProject?.generator?.mode === 'auto-create' ? 'Template Generated' : 'Rules Ready';
+  }, 900);
 });
 
 try {
@@ -134,4 +172,4 @@ try {
   previewRoot.innerHTML = `<div class="engine-error"><strong>Preview gagal dimuat.</strong><span>${error.message}</span></div>`;
 }
 
-console.info('[Wedding Template Studio] Stage #8 Theme & Preset Rules booting.');
+console.info('[Wedding Template Studio] Stage #9 Auto Template Generator booting.');

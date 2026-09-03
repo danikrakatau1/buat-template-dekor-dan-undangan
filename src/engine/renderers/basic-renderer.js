@@ -68,7 +68,7 @@ function createDynamicBackground(scene, palette = {}) {
 }
 
 function isGeneratedFinalCover(scene,project){
-  if(scene?.type!=='cover') return false;
+  if(scene?.type!=='cover'||project?.generator?.referenceNativeRebuild) return false;
   const handoff=String(scene?.renderHandoff||project?.generator?.handoff||'');
   return Boolean(scene?.referenceArchitecture || project?.generator?.referenceArchitecture || project?.generator?.generatedArtworkIsolated || /^10\.10[A-Z]/.test(handoff));
 }

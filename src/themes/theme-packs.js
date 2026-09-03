@@ -1,5 +1,5 @@
 import { resolveThemeVariation } from './preset-rules.js';
-import { createRoyalJogloGardenProject } from '../art-direction/royal-joglo-garden-composer.js';
+import { createJawaFidelityProject } from '../art-direction/jawa-composition-variants.js';
 
 const commonTimeline=[
   {at:120,target:'hero-decor',action:'reveal'},
@@ -62,7 +62,7 @@ function celestialCover(variation){
 }
 
 export const THEME_PACKS=Object.freeze({
-  'jawa-luxury':{id:'jawa-luxury',label:'Jawa Luxury · Royal Joglo HD',seedPrefix:'JL',palette:{background:'#efe3c9',surface:'#f8f0df',text:'#75542f',accent:'#a77a42',muted:'#9c7d59'},tokens:{radius:26,motionIntensity:.66,decorIntensity:.86},createCover:jawaCover,fidelityComposer:'royal-joglo-garden'},
+  'jawa-luxury':{id:'jawa-luxury',label:'Jawa Luxury · HD Heritage',seedPrefix:'JL',palette:{background:'#efe3c9',surface:'#f8f0df',text:'#75542f',accent:'#a77a42',muted:'#9c7d59'},tokens:{radius:26,motionIntensity:.62,decorIntensity:.88},createCover:jawaCover,fidelityComposer:'jawa-fidelity-variants'},
   'ocean-romantic':{id:'ocean-romantic',label:'Ocean Romantic',seedPrefix:'OR',palette:{background:'#071a24',surface:'#0d3440',text:'#effcff',accent:'#8ee7e3',muted:'#8eb8c3'},tokens:{radius:28,motionIntensity:.72,decorIntensity:.7},createCover:oceanCover},
   'celestial-night':{id:'celestial-night',label:'Celestial Night',seedPrefix:'CN',palette:{background:'#060817',surface:'#11142d',text:'#f5f2ff',accent:'#b8a7ff',muted:'#9c9abd'},tokens:{radius:26,motionIntensity:.84,decorIntensity:.76},createCover:celestialCover}
 });
@@ -70,10 +70,9 @@ export const THEME_PACKS=Object.freeze({
 export function createThemeProject(themeId='jawa-luxury',seed){
   const pack=THEME_PACKS[themeId]||THEME_PACKS['jawa-luxury'];
   const resolvedSeed=seed||`${pack.seedPrefix}-DEMO-001`;
-  if(pack.fidelityComposer==='royal-joglo-garden'){
-    const project=createRoyalJogloGardenProject({seed:resolvedSeed});
+  if(pack.fidelityComposer==='jawa-fidelity-variants'){
+    const project=createJawaFidelityProject({seed:resolvedSeed});
     project.project.preset=pack.id;
-    project.project.name=`${pack.label} Demo`;
     project.theme.id=pack.id;
     project.scenes=[...project.scenes,...emptyScenes.map(scene=>({...scene}))];
     return project;

@@ -58,7 +58,11 @@ engine.bus.on('engine:loading', () => {
 engine.bus.on('engine:ready', ({ project }) => {
   statusBadge.textContent = 'Engine Ready';
   statusBadge.dataset.state = 'ready';
-  document.querySelector('.brand-wrap span').textContent = `Core Engine V1 · ${project.project?.preset || 'custom'}`;
+  document.querySelector('.brand-wrap span').textContent = `Layer Engine V1 · ${project.project?.preset || 'custom'}`;
+});
+
+engine.bus.on('renderer:project-rendered', ({ layerStack }) => {
+  if (layerStack?.length) statusBadge.title = `${layerStack.length} canonical layer groups active`;
 });
 
 engine.bus.on('scene:enter', ({ sceneId }) => {
@@ -81,4 +85,4 @@ engine.load('/src/data/project.example.json').catch(error => {
   previewRoot.innerHTML = `<div class="engine-error"><strong>Preview gagal dimuat.</strong><span>${error.message}</span></div>`;
 });
 
-console.info('[Wedding Template Studio] Stage #3 Core Visual Engine booting.');
+console.info('[Wedding Template Studio] Stage #4 Layer & Scene Engine booting.');

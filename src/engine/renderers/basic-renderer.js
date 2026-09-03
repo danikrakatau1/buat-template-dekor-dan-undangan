@@ -1,6 +1,7 @@
 function createLayer(layer = {}) {
+  const kind = layer.kind || layer.type || 'unknown';
   const el = document.createElement('div');
-  el.className = `engine-layer layer-${layer.type || 'unknown'}`;
+  el.className = `engine-layer layer-${kind}`;
   el.dataset.layerId = layer.id || crypto.randomUUID?.() || String(Math.random());
 
   const style = layer.style || {};
@@ -14,14 +15,18 @@ function createLayer(layer = {}) {
   if (style.zIndex != null) el.style.zIndex = style.zIndex;
   if (transform.x != null) el.style.left = `${transform.x}%`;
   if (transform.y != null) el.style.top = `${transform.y}%`;
+  if (transform.width != null) el.style.width = transform.width;
+  if (transform.opacity != null) el.style.opacity = transform.opacity;
+  if (transform.z != null) el.style.zIndex = transform.z;
   if (transform.scale != null) el.style.scale = transform.scale;
   if (transform.rotate != null) el.style.rotate = `${transform.rotate}deg`;
 
-  switch (layer.type) {
+  switch (kind) {
     case 'text': {
       el.classList.add('layer-text');
       el.textContent = layer.content || '';
-      if (layer.role) el.dataset.role = layer.role;
+      if (layer.id === 'cover-title') el.dataset.role = 'eyebrow';
+      else if (layer.role) el.dataset.role = layer.role;
       break;
     }
     case 'button': {
@@ -34,12 +39,13 @@ function createLayer(layer = {}) {
     }
     case 'particle': {
       el.classList.add('layer-particle');
-      el.dataset.particle = layer.preset || layer.effect || 'gold-dust';
+      el.dataset.particle = layer.particle?.type || layer.preset || 'gold-dust';
+      if (layer.particle?.opacity != null) el.style.opacity = layer.particle.opacity;
       break;
     }
     case 'decor': {
       el.classList.add('layer-decor');
-      el.dataset.decor = layer.asset || layer.preset || 'procedural';
+      el.dataset.decor = layer.asset?.generator || layer.asset?.type || layer.preset || 'procedural';
       break;
     }
     case 'background': {
@@ -51,10 +57,16 @@ function createLayer(layer = {}) {
       el.textContent = layer.content || '';
   }
 
-  if (layer.motion?.type) {
-    el.dataset.motion = layer.motion.type;
-    el.style.setProperty('--motion-delay', `${layer.motion.delay || 0}ms`);
-    el.style.setProperty('--motion-duration', `${layer.motion.duration || 900}ms`);
+  const motionPreset = layer.motion?.preset || layer.motion?.type;
+  if (motionPreset) {
+    const normalizedMotion = {
+      'rise-soft': 'fade-up',
+      'clip-up': 'fade-up',
+      'zoom-soft': 'zoom-in'
+    }[motionPreset] || motionPreset;
+    el.dataset.motion = normalizedMotion;
+    el.style.setProperty('--motion-delay', `${layer.motion.delayMs ?? layer.motion.delay ?? 0}ms`);
+    el.style.setProperty('--motion-duration', `${layer.motion.durationMs ?? layer.motion.duration ?? 900}ms`);
   }
 
   return el;
@@ -84,6 +96,15 @@ export class BasicRenderer {
     section.style.setProperty('--scene-bg', palette.background || '#120e0b');
     section.style.setProperty('--scene-fg', palette.text || '#f7ecd8');
     section.style.setProperty('--scene-accent', palette.accent || '#d9ad67');
+
+    if (scene.background?.type === 'procedural') {
+      const background = createLayer({
+        id: `${scene.id}-background`,
+        kind: 'background',
+        gradient: 'radial-gradient(circle at 50% 18%, rgba(214,178,110,.23), transparent 28%), linear-gradient(180deg,#211a19 0%,#101218 62%,#080b12 100%)'
+      });
+      section.appendChild(background);
+    }
 
     (scene.layers || []).forEach(layer => section.appendChild(createLayer(layer)));
 

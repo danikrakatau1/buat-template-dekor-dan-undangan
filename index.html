@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="/src/stage5.css" />
   <link rel="stylesheet" href="/src/stage6.css" />
   <link rel="stylesheet" href="/src/stage7.css" />
+  <link rel="stylesheet" href="/src/stage8.css" />
 </head>
 <body data-theme-pack="jawa-luxury">
   <div id="app" class="studio-shell">
@@ -18,7 +19,7 @@
         <div class="brand-mark">W</div>
         <div>
           <strong>Wedding Template Studio</strong>
-          <span>Starter Theme Packs V1</span>
+          <span>Theme &amp; Preset Rules V1</span>
         </div>
       </div>
       <div class="topbar-actions">
@@ -38,13 +39,13 @@
         <button class="nav-button active">Layers</button>
         <button class="nav-button">Assets</button>
         <button class="nav-button">Presets</button>
-        <div class="asset-library-badge">7 procedural generators · 3 theme packs</div>
+        <div class="asset-library-badge">7 procedural generators · 3 ruled theme packs</div>
       </section>
     </aside>
 
     <main class="canvas-area">
       <div class="canvas-toolbar">
-        <span>Live Theme Preview · Same Engine, Different Art Direction</span>
+        <span>Seeded Variation Preview · Same Theme, Different Composition</span>
         <div class="device-switcher">
           <button class="device-button active" data-device="mobile">Mobile</button>
           <button class="device-button" data-device="tablet">Tablet</button>
@@ -55,43 +56,49 @@
       <div class="preview-stage">
         <div id="preview-frame" class="preview-frame mobile">
           <div id="engine-root" class="engine-root" aria-live="polite">
-            <div class="engine-loading">Building theme pack…</div>
+            <div class="engine-loading">Resolving preset rules…</div>
           </div>
         </div>
       </div>
     </main>
 
     <aside class="panel right-panel">
-      <div class="panel-title">Theme Pack</div>
+      <div class="panel-title">Theme &amp; Rules</div>
       <div class="property-group">
         <label>Preset</label>
         <select id="preset-select"></select>
       </div>
-      <div class="property-group">
-        <label>Motion Level</label>
-        <input type="range" min="0" max="100" value="72" />
-      </div>
-      <div class="property-group">
-        <label>Atmosphere</label>
-        <div class="chip-row">
-          <button class="chip active">Glow</button>
-          <button class="chip active">Ambient</button>
-          <button class="chip active">Depth</button>
+
+      <div class="variation-panel">
+        <div class="variation-row"><span>Seed</span><strong id="variation-seed" class="variation-seed">-</strong></div>
+        <div class="variation-row"><span>Layout</span><strong id="variation-layout">-</strong></div>
+        <div class="variation-row"><span>Hero Motion</span><strong id="variation-motion">-</strong></div>
+        <div class="variation-row"><span>Atmosphere</span><strong id="variation-atmosphere">-</strong></div>
+        <div class="variation-actions">
+          <button class="variation-button" id="generate-variation" type="button">Generate Variation</button>
         </div>
       </div>
-      <div class="property-note">
-        Stage #7 packages the same visual engine into three distinct art directions: Jawa Luxury, Ocean Romantic, and Celestial Night. Switching preset rebuilds the scene from theme rules, not a copied HTML template.
+
+      <div class="property-group">
+        <label>Rule Pools</label>
+        <div class="rule-chip-row">
+          <span class="rule-chip">Layout Pool</span>
+          <span class="rule-chip">Decor Pool</span>
+          <span class="rule-chip">Motion Pool</span>
+          <span class="rule-chip">Atmosphere Pool</span>
+          <span class="rule-chip">Seeded</span>
+        </div>
       </div>
-      <div class="theme-pack-note">
-        <strong>Theme Pack V1</strong>
-        Jawa = batik + gunungan · Ocean = glow + mist + layered waves · Celestial = seeded stars + cosmic glow.
+
+      <div class="property-note">
+        Stage #8 makes variation deterministic. The same seed reproduces the same layout, decor choices, atmosphere, motion set, depth values, and density. A new seed creates a new composition without leaving the selected art direction.
       </div>
     </aside>
 
     <footer class="timeline-bar">
       <span>Timeline</span>
-      <div class="timeline-track"><i style="width:58.33%"></i></div>
-      <span class="checkpoint">#7 Starter Theme Packs</span>
+      <div class="timeline-track"><i style="width:66.66%"></i></div>
+      <span class="checkpoint">#8 Theme / Preset Rules</span>
     </footer>
   </div>
   <script type="module" src="/src/app.js"></script>

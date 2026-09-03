@@ -1,15 +1,17 @@
-import { PixiFidelityRenderer } from './engine/renderers/hybrid/pixi-fidelity-renderer.js';
-import { KonvaEditorOverlay } from './engine/renderers/hybrid/konva-editor-overlay.js';
-import { mountAuxiliaryLayers } from './engine/renderers/hybrid/auxiliary-adapters.js';
-import { HYBRID_RUNTIME_VERSIONS } from './engine/renderers/hybrid/runtime-dependencies.js';
+import { PixiFidelityRenderer } from './hybrid/pixi-fidelity-renderer.js';
+import { KonvaEditorOverlay } from './hybrid/konva-editor-overlay.js';
+import { mountAuxiliaryLayers } from './hybrid/auxiliary-adapters.js';
+import { HYBRID_RUNTIME_VERSIONS } from './hybrid/runtime-dependencies.js';
 import { warmRuntimeEngravingArtwork } from './art-direction/runtime-artwork/runtime-artwork-pack.js';
+import { auditFinalAssetRegistry, FINAL_ASSET_REGISTRY_VERSION } from './art-direction/final-asset-registry.js';
 
-let pixi=null, konva=null, auxiliary=null, activeSceneId=null, generation=0, artworkWarmPromise=null;
+let pixi=null, konva=null, auxiliary=null, generation=0, artworkWarmPromise=null;
 
 function currentProject(){ return window.weddingEditor?.getProject?.() || window.weddingEngine?.store?.getState?.().project || null; }
 function coverScene(project){ return project?.scenes?.find(scene=>scene.type==='cover') || null; }
 function isFidelity(scene,project){ return Boolean(scene?.fidelity?.system==='hd-vector-layered' || project?.fidelity?.mode==='hd-vector-layered'); }
-function warmArtwork(){ return artworkWarmPromise ||= warmRuntimeEngravingArtwork().catch(error=>{ console.warn('[Stage 9.9.3 Artwork Warmup]',error); return 0; }); }
+function warmArtwork(){ return artworkWarmPromise ||= warmRuntimeEngravingArtwork().catch(error=>{ console.warn('[Stage 9.9.5 Artwork Warmup]',error); return 0; }); }
+function registrySnapshot(){ try{return auditFinalAssetRegistry();}catch(error){console.warn('[Stage 9.9.5 Registry Audit]',error);return null;} }
 
 function ensurePanel(){
   let panel=document.querySelector('#hybrid-renderer-panel');
@@ -19,9 +21,22 @@ function ensurePanel(){
   panel=document.createElement('section');
   panel.id='hybrid-renderer-panel';
   panel.className='hybrid-renderer-panel';
-  panel.innerHTML=`<div class="hybrid-head"><div><span>Stage #9.9.3</span><strong>Hybrid GPU Renderer</strong></div><i data-hybrid-dot></i></div><div class="hybrid-grid"><div><span>Renderer</span><strong data-hybrid-renderer>Booting</strong></div><div><span>Motion</span><strong>GSAP ${HYBRID_RUNTIME_VERSIONS.gsap}</strong></div><div><span>Editor</span><strong>Konva ${HYBRID_RUNTIME_VERSIONS.konva}</strong></div><div><span>Artwork</span><strong>Engraving · optimized</strong></div></div><div class="hybrid-note">PixiJS renders the engraving artwork on WebGL. Stage #9.9.3 pre-decodes the runtime WebP artwork and uses revocable Blob URLs with DOM fallback retained.</div>`;
+  panel.innerHTML=`<div class="hybrid-head"><div><span>Stage #9.9.5</span><strong>Studio + Pixi Integration Final</strong></div><i data-hybrid-dot></i></div><div class="hybrid-grid"><div><span>Renderer</span><strong data-hybrid-renderer>Booting</strong></div><div><span>Registry</span><strong data-hybrid-registry>Checking</strong></div><div><span>P0 Required</span><strong data-hybrid-p0>-</strong></div><div><span>Promotion</span><strong data-hybrid-promotion>-</strong></div><div><span>Motion</span><strong>GSAP ${HYBRID_RUNTIME_VERSIONS.gsap}</strong></div><div><span>Editor</span><strong>Konva ${HYBRID_RUNTIME_VERSIONS.konva}</strong></div></div><div class="hybrid-note">DOM fallback and Pixi now consume the same Stage #9.9.4 registry contract. Reserved HD production paths are used only after promotion; current engraving runtime artwork remains the safe active source until then.</div>`;
   anchor.insertAdjacentElement('afterend',panel);
   return panel;
+}
+
+function updateRegistryUI(){
+  const panel=ensurePanel(), audit=registrySnapshot();
+  if(!panel || !audit) return audit;
+  const registry=panel.querySelector('[data-hybrid-registry]');
+  const p0=panel.querySelector('[data-hybrid-p0]');
+  const promotion=panel.querySelector('[data-hybrid-promotion]');
+  if(registry) registry.textContent=audit.contractReady?`v${audit.version} · ready`:`v${audit.version} · check`;
+  if(p0) p0.textContent=`${audit.required-audit.requiredPending.length}/${audit.required} ready`;
+  if(promotion) promotion.textContent=audit.productionPromotionPending.length?`${audit.productionPromotionPending.length} pending`:'HD promoted';
+  panel.dataset.registryReady=audit.contractReady?'true':'false';
+  return audit;
 }
 
 function setStatus(state,text){
@@ -33,13 +48,14 @@ function setStatus(state,text){
 
 function cleanup(){
   pixi?.destroy(); konva?.destroy(); auxiliary?.destroy?.();
-  pixi=null; konva=null; auxiliary=null; activeSceneId=null;
+  pixi=null; konva=null; auxiliary=null;
   document.querySelectorAll('.gpu-scene-surface').forEach(el=>el.remove());
 }
 
 async function mountHybrid(project=currentProject()){
   const run=++generation;
   const scene=coverScene(project);
+  updateRegistryUI();
   if(!scene || !isFidelity(scene,project)){
     cleanup(); setStatus('idle','DOM fallback'); return;
   }
@@ -48,36 +64,38 @@ async function mountHybrid(project=currentProject()){
   cleanup(); setStatus('loading','Decoding engraving…');
   await warmArtwork();
   if(run!==generation) return;
-  setStatus('loading','Loading PixiJS…');
+  setStatus('loading','Loading Pixi WebGL…');
   const surface=document.createElement('div'); surface.className='gpu-scene-surface';
   section.prepend(surface);
   try{
     pixi=new PixiFidelityRenderer();
     const result=await pixi.mount(scene,surface);
     if(run!==generation){ pixi.destroy(); return; }
-    setStatus('ready',`Pixi WebGL · ${result.layers} layers`);
+    const suffix=result.failed?` · ${result.failed} DOM fallback`:'';
+    setStatus(result.failed?'warning':'ready',`Pixi WebGL · ${result.layers} layers${suffix}`);
     konva=new KonvaEditorOverlay();
     konva.mount(section).catch(error=>console.warn('[Konva Overlay]',error));
     auxiliary=await mountAuxiliaryLayers(scene,section);
-    activeSceneId=scene.id;
+    const audit=updateRegistryUI();
     section.dataset.hybridFidelity='ready';
-    section.dataset.artworkOptimization='9.9.3';
+    section.dataset.artworkOptimization='9.9.5';
+    section.dataset.assetRegistry=FINAL_ASSET_REGISTRY_VERSION;
+    section.dataset.productionPromotionPending=String(audit?.productionPromotionPending?.length || 0);
   }catch(error){
-    console.error('[Stage 9.9.3 Hybrid Renderer]',error);
+    console.error('[Stage 9.9.5 Hybrid Renderer]',error);
     surface.remove(); pixi?.destroy(); pixi=null;
     setStatus('warning','DOM fallback active');
   }
 }
 
 function boot(){
-  ensurePanel();
-  warmArtwork();
+  ensurePanel(); updateRegistryUI(); warmArtwork();
   if(!window.weddingEngine || !window.weddingEditor){ setTimeout(boot,60); return; }
   mountHybrid();
   window.weddingEngine.bus?.on?.('engine:ready',({project})=>requestAnimationFrame(()=>mountHybrid(project)));
-  document.querySelectorAll('[data-device]').forEach(button=>button.addEventListener('click',()=>setTimeout(()=>{ if(pixi) pixi.layout(); },80)));
+  document.querySelectorAll('[data-device]').forEach(button=>button.addEventListener('click',()=>setTimeout(()=>{ if(pixi) pixi.layout(); updateRegistryUI(); },80)));
 }
 
 boot();
 window.addEventListener('beforeunload',cleanup,{once:true});
-console.info('[Wedding Template Studio] Stage #9.9.3 Cleanup + Export Optimization booting.');
+console.info('[Wedding Template Studio] Stage #9.9.5 Studio + Pixi Integration Final booting.');

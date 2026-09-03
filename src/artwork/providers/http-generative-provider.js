@@ -12,15 +12,15 @@ async function sourceToFile(source){
   return new File([blob],`source.${ext}`,{type:blob.type||'image/png'});
 }
 
-export function createHttpGenerativeProvider({endpoint=DEFAULT_ENDPOINT,name='Cloudflare Generative Provider'}={}){
+export function createHttpGenerativeProvider({endpoint=DEFAULT_ENDPOINT,name='Cloudflare Workers AI Img2Img'}={}){
   return {
     name,
     endpoint,
     async health({signal}={}){
       try{
-        const response=await fetch(endpoint,{method:'GET',headers:{accept:'application/json'},signal});
+        const response=await fetch(endpoint,{method:'GET',headers:{accept:'application/json'},signal,cache:'no-store'});
         const data=await response.json().catch(()=>({}));
-        return {reachable:response.ok,configured:Boolean(data.configured),provider:data.provider||'server',model:data.model||'',status:response.status,message:data.message||''};
+        return {reachable:response.ok,configured:Boolean(data.configured),provider:data.provider||'server',model:data.model||'',fallbackModel:data.fallbackModel||'',generation:data.generation||null,revision:data.revision||'',status:response.status,message:data.message||''};
       }catch(error){
         return {reachable:false,configured:false,provider:'server',model:'',status:0,message:error?.message||'Provider endpoint unreachable'};
       }
@@ -39,7 +39,7 @@ export function createHttpGenerativeProvider({endpoint=DEFAULT_ENDPOINT,name='Cl
       form.append('output_aspect',payload.output?.aspect||'9:16');
       form.append('textless',String(payload.output?.textless!==false));
 
-      const response=await fetch(endpoint,{method:'POST',body:form,headers:{accept:'application/json'},signal});
+      const response=await fetch(endpoint,{method:'POST',body:form,headers:{accept:'application/json'},signal,cache:'no-store'});
       const data=await response.json().catch(()=>({}));
       if(!response.ok) throw new Error(asErrorMessage(data,response.status));
       if(!data.compositeSrc&&!data.layers?.length) throw new Error('Generative provider returned no artwork output');
@@ -47,7 +47,7 @@ export function createHttpGenerativeProvider({endpoint=DEFAULT_ENDPOINT,name='Cl
         compositeSrc:data.compositeSrc||'',
         layers:Array.isArray(data.layers)?data.layers:[],
         fallback:false,
-        providerMeta:{provider:data.provider||'server',model:data.model||'',requestId:data.requestId||'',promptVersion:data.promptVersion||payload.promptVersion}
+        providerMeta:{provider:data.provider||'server',model:data.model||'',fallbackModel:data.fallbackModel||'',fallbackUsed:Boolean(data.fallbackUsed),generation:data.generation||null,revision:data.revision||'',generatedAt:data.generatedAt||'',requestId:data.requestId||'',promptVersion:data.promptVersion||payload.promptVersion}
       };
     }
   };

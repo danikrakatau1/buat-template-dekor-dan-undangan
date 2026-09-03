@@ -1,54 +1,89 @@
 # Stage #10 — Auto Artwork Transform Engine
 
-## Status
-Implemented as one integrated post-V1 pipeline covering #10.1 through #10.8.
+## Current checkpoint
+**Stage #10.9 — MASTER TRANSFORM PROMPT V1 + Automatic Theme Adapter**
 
-## Scope
-The engine converts a user-supplied source image into a controlled wedding-artwork candidate pipeline. It does not rely on destructive browser shaders to invent carving detail. Instead, it separates source analysis, composition rules, transform-provider orchestration, decor injection, logical layer extraction, QA, Scene JSON generation, and Studio runtime preview.
+The engine now treats generative artwork creation as a provider-backed transformation step instead of trying to manufacture engraving detail with destructive browser shaders.
 
-## #10.1 Source Analyzer
-- Browser-side image decode and compact canvas analysis.
-- Captures dimensions, aspect/orientation, luminance, saturation, edge density, approximate horizon, subject center, negative-space direction, and a protected text-safe area.
+## Pipeline
+Source Image → Source Analyzer → Composition Resolver → Master Transform Prompt V1 → Automatic Theme Adapter → Scene Adapter → Provider Transform → Decor Injection → Layer Extraction → Quality Gate → Scene JSON → Pixi / Motion Runtime.
 
-## #10.2 Preset Engine
-Built-in presets: Vintage Engraving, Javanese Heritage, Royal Botanical, Sakura Engraving, Tropical Sepia, and Luxury Stationery. Presets own palette, detail/line-density intent, texture/atmosphere strength, and decor families.
+## MASTER TRANSFORM PROMPT V1
+The official provider prompt locks the following visual direction:
+- premium vintage engraved wedding illustration
+- antique etching and cross-hatching
+- toile de jouy / chinoiserie-inspired botanical framing
+- parchment / ivory wedding stationery character
+- warm ivory, cream, taupe, antique brown, olive, dusty rose, muted burgundy and blush palette
+- botanical framing from top/left/right and refined floral foreground
+- protected breathing space and readable center
+- engraved clouds, landscape texture, fine contour lines, paper grain and controlled vintage imperfections
+- source subject / landmark preservation
+- no random text, logo, watermark, photorealism, cartoon or glossy digital-painting appearance
 
-## #10.3 Transform Pipeline
-`transformArtwork()` exposes a provider contract rather than embedding secrets in the browser. A generative backend can be connected with:
+The negative prompt is stored separately and is sent to providers as `payload.prompt.negative`.
 
-```js
-window.weddingArtworkProvider = {
-  name: 'my-image-provider',
-  async transform(payload, { signal }) {
-    return { compositeSrc, layers };
-  }
-};
-```
+## Automatic theme adapters
+`ARTWORK_PRESETS` map automatically to theme adapters:
+- Vintage Engraving → `classic-antique-engraving`
+- Javanese Heritage → `javanese-heritage`
+- Royal Botanical → `royal-botanical`
+- Sakura Engraving → `japanese-sakura`
+- Tropical Sepia → `tropical-heritage`
+- Luxury Stationery → `luxury-stationery`
 
-The payload contains source analysis, structural locks, selected preset, textless/layered output intent, and production format preferences. If no provider is connected, the engine uses a source-preserving fallback rather than pretending an AI transform occurred.
+Each adapter supplies theme-specific botanical motifs, cultural motifs, subject-preservation rules and restrained accent colors.
 
-## #10.4 Decor Injection
-Preset-aware curated decor is placed around the protected text region using the existing heritage asset library. Javanese presets can inject carved arch, gunungan, trees, and botanical foreground. This stage is deterministic and remains usable even without an AI backend.
+For the Japanese adapter, Mount Fuji is explicitly preserved as the central landmark when detected/present in the source instruction context; sakura branches, subtle Japanese geometry, dusty-pink blossoms, dark branches, ivory flowers and restrained olive foliage are the visual adaptation language.
 
-## #10.5 Layer Extraction
-Provider-supplied layers are normalized into the Studio's role/depth contract. A flat provider result becomes a safe background layer plus separately injected decor. This is logical extraction unless the configured provider returns true segmented layers.
+## Scene adapter
+The source analyzer feeds prompt variables automatically:
+- source orientation
+- estimated horizon percentage
+- estimated subject center
+- negative-space zone
+- protected text-safe rectangle
+- subject lock
+- silhouette lock
+- horizon lock
+- composition lock
 
-## #10.6 Quality Gate
-Checks output availability, source resolution, edge structure, protected text area, usable layer sources, and provider/fallback state. It produces pass/warn/fail, a numeric score, issue/warning lists, and a retry recommendation.
+This means the provider receives one complete prompt assembled from:
+`MASTER BASE + THEME ADAPTER + SCENE ADAPTER + NEGATIVE PROMPT`.
 
-## #10.7 Studio Integration
-The right-side Studio panel provides image upload, preset selection, provider state, source-analysis summary, selected composition, layer count, QA score, and an `AUTO CREATE ARTWORK` action. Successful runs are converted to Scene JSON, mounted into the existing editor/engine, scheduled through decor motion, and replayed with the existing intro system.
+## Provider contract
+A connected provider implements:
+`window.weddingArtworkProvider.transform(payload, { signal })`
 
-## #10.8 Production Regression Contract
-Each generated project records engine version, all eight stage IDs, source analysis, composition locks, provider mode, QA report, responsive parallax limits, and safe text area. The engine deliberately marks provider-less runs as fallback/warn instead of calling them generative output.
+The payload now includes:
+- `version: 10.9.0`
+- `promptVersion: MASTER-TRANSFORM-PROMPT-V1`
+- `prompt.positive`
+- `prompt.negative`
+- `prompt.themeAdapter`
+- `prompt.scene`
+- source analysis
+- composition locks
+- preset metadata
+- output contract
 
-## Core files
-- `src/artwork/auto-artwork-transform-engine.js`
-- `src/stage10-auto-artwork.js`
-- `src/stage10-auto-artwork.css`
+If no provider is connected, the Studio still performs source analysis, prompt assembly, decor rules, layer normalization, QA and Scene JSON construction, but uses the source-preserving fallback. It does not falsely claim that a generative image transformation occurred.
 
-## Architectural rule
-AI/image transformation creates the artwork. Pixi/GSAP only animate and present the artwork. Runtime Sobel/emboss carving is not part of this pipeline.
+## QA contract
+The quality gate now also verifies that both the positive and negative master prompts exist in the transform result. Provider absence is a warning rather than a false success.
 
-## Production backend boundary
-A real image-to-image model/API is still an external dependency. This repository now has the complete browser orchestration/provider boundary, deterministic fallback, Scene JSON builder, and Studio integration; it does not ship a hidden model endpoint or expose API credentials in client code.
+## Studio integration
+The Stage #10.9 panel displays:
+- provider state
+- source analysis
+- resolved composition
+- automatic theme adapter
+- prompt version
+- layer count
+- QA score
+- engine version
+
+`window.weddingAutoArtworkPrompt` exposes the last assembled prompt for inspection/testing.
+
+## Design rule
+Browser shaders are not the primary method for creating engraving detail. Generative/source artwork must contain the real visual information; Pixi/GSAP remain responsible for motion, parallax, depth and restrained atmosphere after the artwork has been produced.

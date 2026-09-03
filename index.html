@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="/src/stage12.css" />
   <link rel="stylesheet" href="/src/stage9-6.css" />
   <link rel="stylesheet" href="/src/stage9-7.css" />
+  <link rel="stylesheet" href="/src/stage9-8.css" />
 </head>
 <body data-theme-pack="jawa-luxury" class="studio-editor-mode">
   <div id="app" class="studio-shell">
@@ -25,7 +26,7 @@
         <div class="brand-mark">W</div>
         <div>
           <strong>Wedding Template Studio</strong>
-          <span>HD Heritage Fidelity · Stage #9.7</span>
+          <span>Hybrid GPU Fidelity · Stage #9.8</span>
         </div>
       </div>
       <div class="topbar-actions">
@@ -37,129 +38,67 @@
     </header>
 
     <aside class="panel left-panel">
-      <section>
-        <div class="panel-title">Scenes</div>
-        <nav id="scene-list" class="scene-list"></nav>
-      </section>
-      <section>
-        <div class="panel-title">Scene Layers</div>
-        <div id="layer-browser" class="layer-browser"></div>
-      </section>
+      <section><div class="panel-title">Scenes</div><nav id="scene-list" class="scene-list"></nav></section>
+      <section><div class="panel-title">Scene Layers</div><div id="layer-browser" class="layer-browser"></div></section>
       <section>
         <div class="panel-title">Library</div>
-        <button class="nav-button active">Layers</button>
-        <button class="nav-button">Assets</button>
-        <button class="nav-button">Presets</button>
+        <button class="nav-button active">Layers</button><button class="nav-button">Assets</button><button class="nav-button">Presets</button>
         <div class="asset-library-badge">Generate → edit → vary → validate → export</div>
       </section>
     </aside>
 
     <main class="canvas-area">
       <div class="canvas-toolbar">
-        <span>Production Studio · Validated Scene JSON → HD Fidelity Composer → Hardened Engine → Runnable Export</span>
-        <div class="device-switcher">
-          <button class="device-button active" data-device="mobile">Mobile</button>
-          <button class="device-button" data-device="tablet">Tablet</button>
-          <button class="device-button" data-device="desktop">Desktop</button>
-        </div>
+        <span>Production Studio · Scene JSON → Pixi WebGL + GSAP → DOM Editor Overlay → Hardened Export</span>
+        <div class="device-switcher"><button class="device-button active" data-device="mobile">Mobile</button><button class="device-button" data-device="tablet">Tablet</button><button class="device-button" data-device="desktop">Desktop</button></div>
       </div>
-
-      <div class="preview-stage">
-        <div id="preview-frame" class="preview-frame mobile">
-          <div id="engine-root" class="engine-root" aria-live="polite">
-            <div class="engine-loading">Preparing HD heritage fidelity candidate…</div>
-          </div>
-        </div>
-      </div>
+      <div class="preview-stage"><div id="preview-frame" class="preview-frame mobile"><div id="engine-root" class="engine-root" aria-live="polite"><div class="engine-loading">Preparing hybrid GPU fidelity candidate…</div></div></div></div>
     </main>
 
     <aside class="panel right-panel">
       <div class="panel-title">Production Studio</div>
-      <div class="property-group">
-        <label>Theme</label>
-        <select id="preset-select"></select>
-      </div>
+      <div class="property-group"><label>Theme</label><select id="preset-select"></select></div>
 
       <div class="production-panel">
-        <div class="production-header">
-          <div><span>Production Check</span><strong id="production-status">Checking…</strong></div>
-          <i id="production-dot" class="production-dot" aria-hidden="true"></i>
-        </div>
-        <div class="production-stats">
-          <div><span>Scenes</span><strong id="production-scenes">-</strong></div>
-          <div><span>Layers</span><strong id="production-layers">-</strong></div>
-          <div><span>Warnings</span><strong id="production-warnings">-</strong></div>
-        </div>
+        <div class="production-header"><div><span>Production Check</span><strong id="production-status">Checking…</strong></div><i id="production-dot" class="production-dot" aria-hidden="true"></i></div>
+        <div class="production-stats"><div><span>Scenes</span><strong id="production-scenes">-</strong></div><div><span>Layers</span><strong id="production-layers">-</strong></div><div><span>Warnings</span><strong id="production-warnings">-</strong></div></div>
         <div id="production-message" class="production-message">Validating current project…</div>
-        <div class="production-actions">
-          <button id="validate-production" class="production-action" type="button">VALIDATE</button>
-          <button id="export-project-json" class="production-action" type="button">EXPORT JSON</button>
-          <button id="export-runnable-html" class="production-action primary" type="button">EXPORT RUNNABLE HTML</button>
-        </div>
+        <div class="production-actions"><button id="validate-production" class="production-action" type="button">VALIDATE</button><button id="export-project-json" class="production-action" type="button">EXPORT JSON</button><button id="export-runnable-html" class="production-action primary" type="button">EXPORT RUNNABLE HTML</button></div>
       </div>
 
       <div class="variation-lock-panel">
-        <div class="variation-lock-header">
-          <div><span>Variation Locks</span><strong>Preserve what matters</strong></div>
-          <span id="variation-lock-count" class="variation-lock-count">1 locked</span>
-        </div>
+        <div class="variation-lock-header"><div><span>Variation Locks</span><strong>Preserve what matters</strong></div><span id="variation-lock-count" class="variation-lock-count">1 locked</span></div>
         <label class="variation-lock"><input id="lock-content" type="checkbox" checked /><span><strong>Content</strong><em>Keep names, titles, body copy and buttons</em></span></label>
         <label class="variation-lock"><input id="lock-layout" type="checkbox" /><span><strong>Layout</strong><em>Keep X/Y, size, opacity, scale and rotation</em></span></label>
         <label class="variation-lock"><input id="lock-motion" type="checkbox" /><span><strong>Motion</strong><em>Keep selected motion presets and timing</em></span></label>
         <label class="variation-lock"><input id="lock-assets" type="checkbox" /><span><strong>Assets</strong><em>Keep fidelity artwork and asset choices</em></span></label>
         <button id="create-controlled-variation" class="controlled-variation-button" type="button">CREATE CONTROLLED VARIATION</button>
-        <div class="variation-history-row"><span>From</span><strong id="variation-source-seed">-</strong></div>
-        <div class="variation-history-row"><span>Current</span><strong id="variation-current-seed">-</strong></div>
+        <div class="variation-history-row"><span>From</span><strong id="variation-source-seed">-</strong></div><div class="variation-history-row"><span>Current</span><strong id="variation-current-seed">-</strong></div>
       </div>
 
       <div id="editor-empty" class="editor-empty">Pilih layer dari preview atau daftar Scene Layers. Semua perubahan tetap memakai Scene JSON sebagai source of truth.</div>
-
       <div id="editor-panel" class="editor-panel" hidden>
         <div class="editor-selection"><span>Selected Layer</span><strong id="editor-selected-layer">-</strong></div>
         <div class="editor-fields">
           <div class="editor-field wide" id="editor-content-field"><label>Content</label><input id="editor-content" type="text" autocomplete="off" /></div>
-          <div class="editor-field"><label>X %</label><input id="editor-x" type="number" step="0.5" /></div>
-          <div class="editor-field"><label>Y %</label><input id="editor-y" type="number" step="0.5" /></div>
-          <div class="editor-field"><label>Width</label><input id="editor-width" type="text" placeholder="100%" /></div>
-          <div class="editor-field"><label>Opacity</label><input id="editor-opacity" type="number" min="0" max="1" step="0.05" /></div>
-          <div class="editor-field"><label>Scale</label><input id="editor-scale" type="number" min="0.1" max="3" step="0.05" /></div>
-          <div class="editor-field"><label>Rotate</label><input id="editor-rotate" type="number" step="1" /></div>
+          <div class="editor-field"><label>X %</label><input id="editor-x" type="number" step="0.5" /></div><div class="editor-field"><label>Y %</label><input id="editor-y" type="number" step="0.5" /></div>
+          <div class="editor-field"><label>Width</label><input id="editor-width" type="text" placeholder="100%" /></div><div class="editor-field"><label>Opacity</label><input id="editor-opacity" type="number" min="0" max="1" step="0.05" /></div>
+          <div class="editor-field"><label>Scale</label><input id="editor-scale" type="number" min="0.1" max="3" step="0.05" /></div><div class="editor-field"><label>Rotate</label><input id="editor-rotate" type="number" step="1" /></div>
           <div class="editor-field wide"><label>Motion</label><select id="editor-motion"><option value="fade-in">fade-in</option><option value="fade-up">fade-up</option><option value="clip-up">clip-up</option><option value="zoom-soft">zoom-soft</option><option value="rise-soft">rise-soft</option></select></div>
         </div>
-        <div class="editor-actions">
-          <button class="editor-action" id="editor-replay" type="button">Replay Layer</button>
-          <button class="editor-action primary" id="editor-copy-json" type="button">Copy Project JSON</button>
-        </div>
+        <div class="editor-actions"><button class="editor-action" id="editor-replay" type="button">Replay Layer</button><button class="editor-action primary" id="editor-copy-json" type="button">Copy Project JSON</button></div>
       </div>
 
-      <div class="generator-panel">
-        <div class="generator-panel-header"><strong>Generator State</strong><i class="generator-status-dot" aria-hidden="true"></i></div>
-        <div class="generator-grid">
-          <div class="generator-stat"><span>Mode</span><strong id="generator-mode">theme-preview</strong></div>
-          <div class="generator-stat"><span>Scenes</span><strong id="generated-scenes">7</strong></div>
-          <div class="generator-stat"><span>Layers</span><strong id="generated-layers">-</strong></div>
-        </div>
-      </div>
-
-      <div class="variation-panel">
-        <div class="variation-row"><span>Seed</span><strong id="variation-seed" class="variation-seed">-</strong></div>
-        <div class="variation-row"><span>Layout</span><strong id="variation-layout">-</strong></div>
-        <div class="variation-row"><span>Hero Motion</span><strong id="variation-motion">-</strong></div>
-        <div class="variation-row"><span>Atmosphere</span><strong id="variation-atmosphere">-</strong></div>
-        <div class="variation-actions"><button class="variation-button" id="generate-variation" type="button">Generate Cover Variation</button></div>
-      </div>
-
-      <div class="property-note">Stage #9.7 adds HD Heritage reference regression across four Jawa fidelity compositions and mobile/tablet/desktop viewports while preserving the hardened validation and export pipeline from V1.</div>
+      <div class="generator-panel"><div class="generator-panel-header"><strong>Generator State</strong><i class="generator-status-dot" aria-hidden="true"></i></div><div class="generator-grid"><div class="generator-stat"><span>Mode</span><strong id="generator-mode">theme-preview</strong></div><div class="generator-stat"><span>Scenes</span><strong id="generated-scenes">7</strong></div><div class="generator-stat"><span>Layers</span><strong id="generated-layers">-</strong></div></div></div>
+      <div class="variation-panel"><div class="variation-row"><span>Seed</span><strong id="variation-seed" class="variation-seed">-</strong></div><div class="variation-row"><span>Layout</span><strong id="variation-layout">-</strong></div><div class="variation-row"><span>Hero Motion</span><strong id="variation-motion">-</strong></div><div class="variation-row"><span>Atmosphere</span><strong id="variation-atmosphere">-</strong></div><div class="variation-actions"><button class="variation-button" id="generate-variation" type="button">Generate Cover Variation</button></div></div>
+      <div class="property-note">Stage #9.8 adds a non-destructive PixiJS WebGL fidelity backend, GSAP GPU motion, Konva editor overlay, and lazy SVG.js/Lottie/Rive adapters while preserving the V1 DOM fallback, Scene JSON, validation and export systems.</div>
     </aside>
 
-    <footer class="timeline-bar">
-      <span>Timeline</span>
-      <div class="timeline-track"><i style="width:100%"></i></div>
-      <span class="checkpoint">#9.7 Reference Regression Pass · HD Heritage Fidelity</span>
-    </footer>
+    <footer class="timeline-bar"><span>Timeline</span><div class="timeline-track"><i style="width:100%"></i></div><span class="checkpoint">#9.8 Hybrid GPU Renderer · Pixi + GSAP + Konva</span></footer>
   </div>
   <script type="module" src="/src/app.js"></script>
   <script type="module" src="/src/stage9-6.js"></script>
   <script type="module" src="/src/stage9-7.js"></script>
+  <script type="module" src="/src/stage9-8.js"></script>
 </body>
 </html>

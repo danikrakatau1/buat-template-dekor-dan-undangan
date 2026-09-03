@@ -1,0 +1,36 @@
+/* Stage #6 — Procedural Asset Engine */
+.procedural-asset{pointer-events:none;color:var(--scene-accent);transform-origin:center;contain:layout paint style}
+.procedural-asset>svg{display:block;width:100%;height:100%;overflow:visible}
+
+.procedural-gunungan{filter:drop-shadow(0 26px 60px rgba(0,0,0,.34))}
+.procedural-ornament-frame{inset:5%;width:auto!important;height:auto;left:5%!important;top:5%!important;opacity:.48;color:color-mix(in srgb,var(--scene-accent) 76%,white 24%)}
+.procedural-ornament-frame>svg{width:100%;height:100%}
+.procedural-batik{inset:-8%;width:auto!important;height:auto;left:-8%!important;top:-8%!important;opacity:.6;mix-blend-mode:soft-light}
+.procedural-batik>svg{width:100%;height:100%}
+.procedural-mist{inset:0;width:100%!important;height:100%;left:0!important;top:0!important;color:var(--scene-fg);opacity:.75;mix-blend-mode:screen}
+.procedural-mist>svg{width:100%;height:100%}
+.procedural-stars{inset:0;width:100%!important;height:100%;left:0!important;top:0!important;opacity:.8}
+.procedural-wave{width:120%!important;left:-10%!important;top:auto!important;bottom:-2%;height:44%;color:color-mix(in srgb,var(--scene-accent) 58%,#90d6ff 42%)}
+.procedural-glow{inset:0;width:100%!important;height:100%;left:0!important;top:0!important;mix-blend-mode:screen}
+
+.asset-breathe{transform-origin:50% 58%;animation:asset-breathe 7.8s ease-in-out infinite}
+.asset-stars{transform-origin:center;animation:asset-stars-drift 20s ease-in-out infinite alternate}
+.asset-mist{animation:asset-mist-drift 13s ease-in-out infinite alternate}
+
+[data-generator="ornament-frame"]{animation:ornament-breathe 9s ease-in-out infinite}
+[data-generator="batik"]{animation:batik-drift 18s linear infinite}
+[data-generator="wave"]{animation:wave-float 7s ease-in-out infinite}
+
+@keyframes asset-breathe{50%{transform:scale(1.025) translateY(-3px)}}
+@keyframes asset-stars-drift{to{transform:translate3d(6px,-10px,0) scale(1.02)}}
+@keyframes asset-mist-drift{to{transform:translate3d(18px,-5px,0) scale(1.04);opacity:.72}}
+@keyframes ornament-breathe{50%{opacity:.7;filter:drop-shadow(0 0 18px color-mix(in srgb,var(--scene-accent) 18%,transparent))}}
+@keyframes batik-drift{to{transform:translate3d(24px,24px,0)}}
+@keyframes wave-float{50%{transform:translate3d(0,-7px,0) scaleX(1.015)}}
+
+.asset-library-badge{display:inline-flex;align-items:center;gap:6px;font-size:10px;color:#c9d3e2;border:1px solid var(--border);background:rgba(255,255,255,.025);padding:6px 8px;border-radius:999px;margin-top:8px}
+.asset-library-badge::before{content:'◆';font-size:7px;color:var(--accent)}
+
+@media(prefers-reduced-motion:reduce){
+  .asset-breathe,.asset-stars,.asset-mist,[data-generator="ornament-frame"],[data-generator="batik"],[data-generator="wave"]{animation:none!important}
+}

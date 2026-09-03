@@ -1,58 +1,70 @@
-# Stage #10.10 — Generative Provider Integration
+# Stage #10.10 — Cloudflare Workers AI Generative Provider
 
-Stage #10.10 connects the existing MASTER TRANSFORM PROMPT V1 pipeline to a server-side generative image provider without exposing provider credentials in the browser.
+Stage #10.10 connects MASTER TRANSFORM PROMPT V1 to Cloudflare Workers AI image-to-image generation through a Pages Function. OpenAI credentials are no longer required.
 
 ## Runtime flow
 
 1. User uploads a source image in Wedding Template Studio.
 2. Source Analyzer + Composition Resolver run in the browser.
-3. MASTER TRANSFORM PROMPT V1 assembles:
-   - base engraving/wedding-stationery prompt
-   - automatic theme adapter
-   - scene adapter / structure locks
-   - negative constraints
+3. MASTER TRANSFORM PROMPT V1 assembles the base style prompt, automatic theme adapter, scene adapter/structure locks, and negative constraints.
 4. `src/artwork/providers/http-generative-provider.js` sends the source image and prompt contract to `/api/artwork-transform`.
-5. Cloudflare Pages Function `functions/api/artwork-transform.js` calls the server-side image edit provider.
-6. The transformed composite returns to the existing decor injection, layer extraction, quality gate, Scene JSON builder, and Pixi/GSAP runtime.
+5. `functions/api/artwork-transform.js` calls `env.AI.run()` using the Cloudflare Workers AI binding.
+6. The transformed composite returns to decor injection, layer extraction, quality gate, Scene JSON builder, and Pixi/GSAP runtime.
 
-## Default server provider
+## Models
 
-The included Cloudflare Pages Function uses OpenAI's image edit API. The default model is `gpt-image-2`, with optional environment overrides.
+Primary model:
 
-Required Cloudflare Pages environment variable:
+- `@cf/stabilityai/stable-diffusion-xl-base-1.0`
 
-- `OPENAI_API_KEY`
+Automatic fallback:
 
-Optional variables:
+- `@cf/runwayml/stable-diffusion-v1-5-img2img`
 
-- `OPENAI_IMAGE_MODEL` — default `gpt-image-2`
-- `OPENAI_IMAGE_SIZE` — default `1024x1536`
-- `OPENAI_IMAGE_QUALITY`
-- `OPENAI_IMAGE_INPUT_FIDELITY`
+Both accept img2img source data, positive prompt, negative prompt, generation dimensions, steps, strength, and guidance.
 
-The API key remains server-side and is never returned to the client.
+Default generation tuning:
+
+- width: `1024`
+- height: `1792`
+- steps: `20`
+- strength: `0.58`
+- guidance: `7.5`
+
+Optional environment overrides:
+
+- `WORKERS_AI_IMAGE_MODEL`
+- `WORKERS_AI_FALLBACK_MODEL`
+- `WORKERS_AI_IMAGE_WIDTH`
+- `WORKERS_AI_IMAGE_HEIGHT`
+- `WORKERS_AI_IMAGE_STEPS`
+- `WORKERS_AI_IMAGE_STRENGTH`
+- `WORKERS_AI_IMAGE_GUIDANCE`
+
+## Required Cloudflare setup
+
+Pages Functions require a Workers AI binding. In the Cloudflare dashboard, add a Workers AI binding to this Pages project with the binding name exactly:
+
+`AI`
+
+The Pages Function accesses it as `env.AI`.
+
+No OpenAI API key is required for this provider path.
 
 ## Health state
 
-`GET /api/artwork-transform` reports whether the endpoint is reachable and whether `OPENAI_API_KEY` is configured. The Studio panel displays:
+`GET /api/artwork-transform` reports whether `env.AI` is available and exposes the active primary/fallback model IDs. Studio shows:
 
-- provider/model ready
-- backend ready but key missing
-- provider endpoint offline
+- `Cloudflare Workers AI` when the binding is active
+- `AI binding missing` when the endpoint exists but the binding has not been attached
+- `Provider endpoint offline` when the Pages Function cannot be reached
 
 ## Failure behavior
 
-The transform request never silently pretends that a generative result exists. Provider errors are surfaced in the Studio panel. The pre-existing source-preserving fallback remains available when no provider is installed, but the default #10.10 browser adapter is installed automatically when the Stage 10 Studio boots.
+The primary SDXL request is attempted first. If it fails, the function automatically retries with Stable Diffusion 1.5 img2img. If both fail, the error is surfaced to Studio rather than pretending a generated artwork exists.
 
-## Security
-
-- no provider API key in client JavaScript
-- no key in Scene JSON
-- no caching of generated API responses by the Pages Function
-- source upload is sent only when the user explicitly presses `AUTO CREATE ARTWORK`
+The image source is limited to 10 MB in this integration. MASTER TRANSFORM PROMPT V1 and its automatic theme adapter remain the source of transformation instructions.
 
 ## Checkpoint
 
-Stage #10.10 completes the connection:
-
-`Source → Analyze → MASTER PROMPT V1 → Theme Adapter → Server Provider → Generated Artwork → Decor → Layers → QA → Scene JSON → Pixi`
+`Source → Analyze → MASTER PROMPT V1 → Theme Adapter → Workers AI SDXL → SD1.5 fallback → Generated Artwork → Decor → Layers → QA → Scene JSON → Pixi`

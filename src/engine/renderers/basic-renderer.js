@@ -32,6 +32,13 @@ function mountProceduralAsset(layer, el, generator) {
   el.innerHTML = renderProceduralAsset(generator, options);
 }
 
+function resolveLayerImageSource(layer={}) {
+  const asset=layer.asset || {};
+  if (asset.resolvedSrc) return asset.resolvedSrc;
+  if (asset.productionSrc && asset.src === asset.productionSrc) return asset.productionSrc;
+  return asset.src || layer.src || asset.fallbackSrc || '';
+}
+
 function createLayer(layer = {}) {
   const kind = layer.kind || layer.type || 'unknown';
   const el = document.createElement('div');
@@ -91,9 +98,12 @@ function createLayer(layer = {}) {
     }
     case 'image': {
       const img = document.createElement('img');
-      img.src = layer.asset?.src || layer.src || '';
+      img.src = resolveLayerImageSource(layer);
       img.alt = layer.alt || '';
       img.loading = 'lazy';
+      img.decoding = 'async';
+      if (layer.asset?.productionSrc && img.src === layer.asset.productionSrc) el.dataset.assetSource = 'production';
+      else el.dataset.assetSource = 'active';
       el.appendChild(img);
       break;
     }

@@ -6,8 +6,142 @@
     "preset": "jawa-luxury",
     "seed": "JL-DEMO-001"
   },
+  "theme": {
+    "id": "jawa-luxury",
+    "palette": {
+      "background": "#160f0b",
+      "surface": "#2a1a12",
+      "text": "#f7ead7",
+      "accent": "#d7ae67",
+      "muted": "#a58d78"
+    },
+    "tokens": {
+      "radius": 24,
+      "motionIntensity": 0.8,
+      "decorIntensity": 0.75
+    }
+  },
+  "audio": {
+    "src": "",
+    "autoplayAfterOpen": true,
+    "loop": true,
+    "volume": 0.75,
+    "fadeInMs": 1200
+  },
   "scenes": [
-    { "id": "cover", "type": "cover", "layers": [] },
+    {
+      "id": "cover",
+      "type": "cover",
+      "preset": "jawa-cinematic",
+      "background": {
+        "type": "procedural",
+        "transition": "cinematic-crossfade",
+        "durationMs": 6000,
+        "transitionMs": 1200,
+        "kenBurns": "zoom-in"
+      },
+      "atmosphere": {
+        "effects": ["glow", "vignette", "grain"],
+        "intensity": 0.6
+      },
+      "timeline": [
+        { "at": 100, "target": "gunungan-main", "action": "reveal" },
+        { "at": 1200, "target": "gold-dust", "action": "start" },
+        { "at": 1800, "target": "cover-title", "action": "reveal" },
+        { "at": 2300, "target": "couple-name", "action": "reveal" }
+      ],
+      "layers": [
+        {
+          "id": "gunungan-main",
+          "kind": "decor",
+          "role": "decor-main",
+          "asset": {
+            "type": "procedural",
+            "generator": "gunungan",
+            "variant": "royal-center"
+          },
+          "transform": {
+            "x": 50,
+            "y": 56,
+            "width": "74%",
+            "scale": 1,
+            "rotate": 0,
+            "opacity": 1,
+            "depth": 0.12,
+            "z": 50,
+            "anchor": "center"
+          },
+          "motion": {
+            "preset": "rise-soft",
+            "delayMs": 100,
+            "durationMs": 1400,
+            "easing": "premium",
+            "once": true,
+            "parallax": 0.12
+          }
+        },
+        {
+          "id": "gold-dust",
+          "kind": "particle",
+          "role": "ambient",
+          "particle": {
+            "type": "gold-dust",
+            "density": 28,
+            "speed": 0.8,
+            "size": 2.2,
+            "opacity": 0.35,
+            "direction": "bottom-right",
+            "wind": 0.12,
+            "color": "#d7ae67",
+            "randomness": 0.8
+          }
+        },
+        {
+          "id": "cover-title",
+          "kind": "text",
+          "role": "content",
+          "content": "The Wedding Of",
+          "motion": {
+            "preset": "clip-up",
+            "delayMs": 1800,
+            "durationMs": 900,
+            "easing": "premium",
+            "once": true
+          }
+        },
+        {
+          "id": "couple-name",
+          "kind": "text",
+          "role": "content",
+          "content": "Anif & Dini",
+          "motion": {
+            "preset": "fade-up",
+            "delayMs": 2300,
+            "durationMs": 1000,
+            "easing": "premium",
+            "once": true
+          }
+        },
+        {
+          "id": "open-button",
+          "kind": "button",
+          "role": "interaction",
+          "content": "Buka Undangan",
+          "motion": {
+            "preset": "zoom-soft",
+            "delayMs": 2800,
+            "durationMs": 800,
+            "easing": "premium",
+            "once": true
+          }
+        }
+      ],
+      "responsive": {
+        "desktop": { "particleMultiplier": 1, "parallaxMultiplier": 1 },
+        "tablet": { "particleMultiplier": 0.75, "parallaxMultiplier": 0.7 },
+        "mobile": { "particleMultiplier": 0.5, "parallaxMultiplier": 0.4 }
+      }
+    },
     { "id": "couple", "type": "couple", "layers": [] },
     { "id": "event", "type": "event", "layers": [] },
     { "id": "story", "type": "story", "layers": [] },

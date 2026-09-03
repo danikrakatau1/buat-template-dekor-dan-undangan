@@ -16,22 +16,33 @@ Private experimental studio for building reusable wedding invitation templates w
 11. Variation System
 12. Export + Production Hardening
 
-## Active post-V1 direction
-**Stage #11 — Reference-Locked Native Rebuild**
+## Active post-V1 checkpoint
+**Stage #11.7 — Reference-Locked Native Rebuild Final**
 
 Target reference: `ART JAWA COKLAT 3`
 
-The earlier #10.10J–#10.10N work proved the artwork-only/source-fidelity path, but it is no longer considered the final page architecture. The next production target is a native section-by-section reconstruction of the supplied reference rather than a generated cover followed by generic Studio scenes.
+Stage #11 replaces the earlier generated-cover + generic-post-cover approach. The final path is a deterministic native reconstruction driven by the Stage #11.1 reference map and a generated artwork plate.
 
-### #11.1 — Reference Structure Mapping — COMPLETE
+### Completed Stage 11
+- #11.1 Reference Structure Mapping ✅
+- #11.2 Visual DNA Extraction ✅
+- #11.3 Section Blueprint Rewrite ✅
+- #11.4 Native Scene Reconstruction ✅
+- #11.5 Editable Data Binding ✅
+- #11.6 Motion Choreography Match ✅
+- #11.7 Fidelity QA ✅
 
-Runtime reference contract:
-`src/reference/art-jawa-coklat-3-reference-map.js`
+Runtime files:
+- `src/reference/art-jawa-coklat-3-reference-map.js`
+- `src/reference/art-jawa-coklat-3-native-rebuild.js`
+- `src/stage11-reference-rebuild.js`
+- `src/stage11-reference-rebuild.css`
 
-Blueprint:
-`docs/STAGE-11.1-REFERENCE-STRUCTURE-MAPPING.md`
+Blueprints:
+- `docs/STAGE-11.1-REFERENCE-STRUCTURE-MAPPING.md`
+- `docs/STAGE-11.2-11.7-REFERENCE-NATIVE-REBUILD-FINAL.md`
 
-Mapped source flow:
+Native reconstructed flow:
 1. Cover
 2. Opening Motion
 3. Couple Introduction
@@ -44,24 +55,20 @@ Mapped source flow:
 10. RSVP
 11. Ucapan & Doa
 12. Closing
-13. Optional own-brand footer
 
-Canonical reference media identified:
-- `download.png` recurring artwork plate
-- `download-1.png` secondary/couple accent artwork
-- `JAWA-COKLAT-3-1.mp4` opening cinematic motion
+Source branding is excluded from production output. The original reference media is used only as design/behavior evidence; the runtime reconstruction reuses the generated artwork plate and native Studio layers.
 
-Motion intent is mapped from Elementor vocabulary into native Studio presets. Source branding is reference-only and must not be copied into production.
+## Final architecture
 
-## Stage 11 remaining roadmap
+`Source Image → AI artwork transform → generated artwork plate → Stage 11 reference-native rebuild → 12 editable scenes → native opening/motion → fidelity QA`
 
-- #11.2 Visual DNA Extraction
-- #11.3 Section Blueprint Rewrite
-- #11.4 Native Scene Reconstruction
-- #11.5 Editable Data Binding
-- #11.6 Motion Choreography Match
-- #11.7 Fidelity QA
+### Final runtime indicators
+- header: `Reference Native Rebuild · Stage #11.7`
+- checkpoint: `#11.7 Visual DNA · Native Reconstruction · Data Binding · Motion · Fidelity QA`
+- `window.weddingReferenceRebuildQA.status === "locked"`
+- no generic `COUPLE / Couple` placeholder after opening
+- cover opening duration remains 1500 ms
 
 ## Architecture rule
 
-Reference first. Native Studio reconstruction second. AI is limited to artwork transformation and must not invent the page structure, section order, floral frame, wedding cards, typography, CTA placement, or post-cover scenes.
+Reference first. Native Studio reconstruction second. AI is limited to artwork transformation and must not invent page structure, section order, wedding cards, typography, CTA placement, forms, or post-cover scenes.

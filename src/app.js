@@ -1,15 +1,6 @@
 import { WeddingVisualEngine } from './engine/core/engine.js';
 
-const scenes = [
-  'Cover',
-  'Couple',
-  'Event',
-  'Story',
-  'Gallery',
-  'RSVP',
-  'Closing'
-];
-
+const scenes = ['Cover','Couple','Event','Story','Gallery','RSVP','Closing'];
 const sceneList = document.querySelector('#scene-list');
 const previewFrame = document.querySelector('#preview-frame');
 const previewRoot = document.querySelector('#engine-root');
@@ -28,10 +19,7 @@ scenes.forEach((name, index) => {
   button.addEventListener('click', () => {
     document.querySelectorAll('.scene-item').forEach(el => el.classList.remove('active'));
     button.classList.add('active');
-    previewRoot.querySelector(`[data-scene-id="${button.dataset.sceneTarget}"]`)?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
+    previewRoot.querySelector(`[data-scene-id="${button.dataset.sceneTarget}"]`)?.scrollIntoView({ behavior:'smooth', block:'start' });
   });
   sceneList.appendChild(button);
 });
@@ -41,13 +29,14 @@ document.querySelectorAll('[data-device]').forEach(button => {
     document.querySelectorAll('[data-device]').forEach(el => el.classList.remove('active'));
     button.classList.add('active');
     previewFrame.className = `preview-frame ${button.dataset.device}`;
+    engine.decorMotion?.schedule();
   });
 });
 
 autoCreate.addEventListener('click', () => {
   engine.playIntro();
-  autoCreate.textContent = 'Playing Intro';
-  setTimeout(() => autoCreate.textContent = 'Play Intro', 1400);
+  autoCreate.textContent = 'Replaying…';
+  setTimeout(() => autoCreate.textContent = 'Replay Motion', 1400);
 });
 
 engine.bus.on('engine:loading', () => {
@@ -58,24 +47,20 @@ engine.bus.on('engine:loading', () => {
 engine.bus.on('engine:ready', ({ project }) => {
   statusBadge.textContent = 'Engine Ready';
   statusBadge.dataset.state = 'ready';
-  document.querySelector('.brand-wrap span').textContent = `Layer Engine V1 · ${project.project?.preset || 'custom'}`;
-});
-
-engine.bus.on('renderer:project-rendered', ({ layerStack }) => {
-  if (layerStack?.length) statusBadge.title = `${layerStack.length} canonical layer groups active`;
+  document.querySelector('.brand-wrap span').textContent = `Motion & Decor V1 · ${project.project?.preset || 'custom'}`;
 });
 
 engine.bus.on('scene:enter', ({ sceneId }) => {
-  document.querySelectorAll('.scene-item').forEach(el => {
-    el.classList.toggle('active', el.dataset.sceneTarget === sceneId);
-  });
+  document.querySelectorAll('.scene-item').forEach(el => el.classList.toggle('active', el.dataset.sceneTarget === sceneId));
 });
 
 engine.bus.on('timeline:step', step => {
   statusBadge.textContent = step.label || step.action || `Timeline ${step.at || 0}ms`;
-  setTimeout(() => {
-    statusBadge.textContent = 'Engine Ready';
-  }, 900);
+  setTimeout(() => { statusBadge.textContent = 'Engine Ready'; }, 900);
+});
+
+engine.bus.on('motion:replay', () => {
+  statusBadge.textContent = 'Motion Replay';
 });
 
 engine.load('/src/data/project.example.json').catch(error => {
@@ -85,4 +70,4 @@ engine.load('/src/data/project.example.json').catch(error => {
   previewRoot.innerHTML = `<div class="engine-error"><strong>Preview gagal dimuat.</strong><span>${error.message}</span></div>`;
 });
 
-console.info('[Wedding Template Studio] Stage #4 Layer & Scene Engine booting.');
+console.info('[Wedding Template Studio] Stage #5 Motion & Decor Engine booting.');

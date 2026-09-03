@@ -21,6 +21,7 @@ export class WeddingVisualEngine {
       onEnter: element => this.enterScene(element),
       onLeave: element => this.leaveScene(element)
     });
+    this.mounted = false;
   }
 
   async load(url) {
@@ -36,6 +37,15 @@ export class WeddingVisualEngine {
   }
 
   mount(project) {
+    if (!project || typeof project !== 'object') throw new Error('Engine mount requires a project object.');
+    if (!Array.isArray(project.scenes)) throw new Error('Engine mount requires project.scenes array.');
+
+    if (this.mounted) {
+      this.timeline.cancel();
+      this.observer.disconnect();
+      this.decorMotion.destroy();
+    }
+
     this.store.setState({
       status: 'rendering',
       project,
@@ -47,6 +57,7 @@ export class WeddingVisualEngine {
     this.root.querySelectorAll('[data-scene-id]').forEach(scene => this.observer.observe(scene));
     this.bindTimeline(project);
     this.decorMotion.start();
+    this.mounted = true;
 
     this.store.setState({ status: 'ready' });
     this.bus.emit('engine:ready', { project });
@@ -92,6 +103,7 @@ export class WeddingVisualEngine {
     this.observer.disconnect();
     this.bus.clear();
     this.root.replaceChildren();
+    this.mounted = false;
     this.store.setState({ status: 'destroyed', project: null, activeSceneId: null });
   }
 }

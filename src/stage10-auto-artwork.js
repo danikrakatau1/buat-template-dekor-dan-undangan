@@ -1,7 +1,7 @@
 import { AutoArtworkTransformEngine, ARTWORK_PRESETS, ARTWORK_ENGINE_VERSION, MASTER_TRANSFORM_PROMPT_VERSION, providerStatus } from './artwork/auto-artwork-transform-engine.js';
 import { installDefaultGenerativeProvider } from './artwork/providers/http-generative-provider.js';
 
-const STAGE_REVISION='10.10N';
+const STAGE_REVISION='10.10N.1';
 const PIPELINE_LABEL='REFERENCE ARCHITECTURE · SOURCE FIDELITY · NATIVE LAYERS · MOTION · REGRESSION';
 const defaultProvider=installDefaultGenerativeProvider({name:'Cloudflare Workers AI Provider'});
 const engine=new AutoArtworkTransformEngine();
@@ -22,6 +22,7 @@ function clone(value){return globalThis.structuredClone?structuredClone(value):J
 function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
 function round(v,d=3){const f=10**d;return Math.round(v*f)/f;}
 function findText(layers,test,fallback){return layers.find(layer=>layer?.kind==='text'&&test(String(layer.content||'')))?.content||fallback;}
+function currentStudioProject(){return window.weddingEditor?.getProject?.()||window.weddingEngine?.store?.getState?.().project||null;}
 
 function readImage(src){return new Promise((resolve,reject)=>{const img=new Image();img.decoding='async';img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('Artwork image could not be decoded'));img.src=src;});}
 
@@ -57,24 +58,24 @@ function compareStructure(source,output){
   return {score:round(score),row:round(row),col:round(col),center:round(center),horizon:round(horizon),styleDelta:round(styleDelta)};
 }
 
-function referenceLayout(){
-  return {mode:'reference-cover',title:19,names:26,guestLabel:39,guest:44,location:48,cta:56};
-}
+function referenceLayout(){return {mode:'reference-cover',title:19,names:26,guestLabel:39,guest:44,location:48,cta:56};}
 
-function normalizeReferenceProject(result,generatedSrc,fidelity){
-  const project=clone(result.project||{});
-  const cover=project?.scenes?.find(scene=>scene.type==='cover')||project?.scenes?.[0];
-  if(!cover)return project;
-  const oldLayers=Array.isArray(cover.layers)?cover.layers:[];
+function normalizeReferenceProject(result,generatedSrc,fidelity,baseProject=null){
+  const generatedProject=clone(result.project||{});
+  const existing=baseProject&&Array.isArray(baseProject.scenes)?clone(baseProject):null;
+  const project=existing||generatedProject;
+  const generatedCover=generatedProject?.scenes?.find(scene=>scene.type==='cover')||generatedProject?.scenes?.[0];
+  let cover=project?.scenes?.find(scene=>scene.type==='cover')||project?.scenes?.[0];
+  if(!cover){project.scenes=[];cover={id:'cover',type:'cover',layers:[]};project.scenes.push(cover);}
+  const oldLayers=Array.isArray(generatedCover?.layers)?generatedCover.layers:Array.isArray(cover.layers)?cover.layers:[];
   const names=findText(oldLayers,v=>v.includes('&'),'Anif & Dini');
   const guest=findText(oldLayers,v=>/tamu undangan/i.test(v),'Tamu Undangan');
   const layout=referenceLayout();
 
-  cover.background=null;cover.atmosphere={effects:[]};cover.disableEditorOverlay=true;
+  cover.id=cover.id||'cover';cover.type='cover';cover.background=null;cover.atmosphere={effects:[]};cover.disableEditorOverlay=true;
   cover.renderHandoff=STAGE_REVISION;
   cover.referenceArchitecture={version:'ARTWORK-PLATE-HTML-UI-V1',artworkPlate:true,generatedDecor:false,textInArtwork:false,nativeTypography:true,nativeCTA:true,openingMotion:true};
-  cover.sourceFidelity=fidelity;
-  cover.safeUILayout=layout;
+  cover.sourceFidelity=fidelity;cover.safeUILayout=layout;
   cover.fidelity={...(cover.fidelity||{}),system:'auto-artwork-transform',handoff:`reference-architecture-${STAGE_REVISION}`};
   cover.layers=[
     {id:'ai-transformed-base',kind:'image',role:'background',src:generatedSrc,depth:0,asset:{src:generatedSrc,resolvedSrc:generatedSrc},transform:{x:50,y:50,width:'100%',opacity:1,scale:1,depth:0},motion:{parallax:0}},
@@ -86,22 +87,21 @@ function normalizeReferenceProject(result,generatedSrc,fidelity){
     {id:'cover-open',kind:'button',role:'button',content:'Buka Undangan',transform:{x:50,y:layout.cta,width:'150px',opacity:1},motion:{preset:'zoom-in',durationMs:760}}
   ];
   cover.timeline=[];
-  project.generator={...(project.generator||{}),mode:'auto-artwork-transform',handoff:STAGE_REVISION,referenceArchitecture:true,sourceFidelityLock:true,generatedDecor:false,nativeLayers:true,textlessArtwork:true,disableEditorOverlay:true,openingMotion:true,finalRegression:true};
+  project.generator={...(project.generator||{}),mode:'auto-artwork-transform',handoff:STAGE_REVISION,referenceArchitecture:true,sourceFidelityLock:true,generatedDecor:false,nativeLayers:true,textlessArtwork:true,disableEditorOverlay:true,openingMotion:true,finalRegression:true,preservedPostCoverScenes:Boolean(existing&&project.scenes.length>1)};
   project.fidelity={...(project.fidelity||{}),mode:'auto-artwork-transform',handoff:STAGE_REVISION,referenceArchitecture:true};
+  project.artwork={...(project.artwork||{}),source:result?.analysis?.source||sourceUrl,analysis:result.analysis,composition:result.composition,preset:result?.transformed?.preset||project?.artwork?.preset,provider:result?.transformed?.provider,quality:result?.quality};
   return project;
 }
 
 function finalRegression(result,trace,fidelity){
   let score=100;const issues=[];
   if(trace.state==='SOURCE REUSED'){score-=45;issues.push('source-reused');}
-  if(fidelity.score<.72){score-=28;issues.push('structure-drift');}
-  else if(fidelity.score<.80){score-=12;issues.push('structure-warning');}
+  if(fidelity.score<.72){score-=28;issues.push('structure-drift');}else if(fidelity.score<.80){score-=12;issues.push('structure-warning');}
   if(fidelity.center<.72){score-=10;issues.push('subject-shift');}
   if(fidelity.horizon<.70){score-=10;issues.push('horizon-shift');}
   if(fidelity.styleDelta<.025){score-=12;issues.push('style-too-weak');}
   if(!result?.quality?.ok){score-=8;issues.push('engine-qa');}
-  score=clamp(score,0,100);
-  return {score,status:score>=88?'locked':score>=74?'pass-with-warning':'review',ok:score>=74,issues};
+  score=clamp(score,0,100);return {score,status:score>=88?'locked':score>=74?'pass-with-warning':'review',ok:score>=74,issues};
 }
 
 function installCoverOpening(project){
@@ -109,13 +109,23 @@ function installCoverOpening(project){
     const cover=project?.scenes?.find(s=>s.type==='cover')||project?.scenes?.[0];if(!cover?.id)return;
     const section=document.querySelector(`[data-scene-id="${CSS.escape(cover.id)}"]`);if(!section)return;
     const button=section.querySelector('[data-layer-id="cover-open"] .engine-button');if(!button)return;
+    const nextScene=section.nextElementSibling?.matches?.('[data-scene-id]')?section.nextElementSibling:null;
     button.onclick=async()=>{
       if(section.dataset.opening==='true')return;section.dataset.opening='true';
       try{document.querySelector('#song')?.play?.().catch?.(()=>{});}catch{}
-      window.dispatchEvent(new CustomEvent('wedding:cover-open',{detail:{sceneId:cover.id,revision:STAGE_REVISION}}));
+      window.dispatchEvent(new CustomEvent('wedding:cover-open',{detail:{sceneId:cover.id,revision:STAGE_REVISION,hasNextScene:Boolean(nextScene)}}));
+      if(!nextScene){
+        const animation=section.animate([{transform:'translateY(0) scale(1)',filter:'brightness(1)'},{transform:'translateY(-1.5%) scale(.992)',filter:'brightness(1.035)',offset:.5},{transform:'translateY(0) scale(1)',filter:'brightness(1)'}],{duration:700,easing:'cubic-bezier(.22,1,.36,1)'});
+        try{await animation.finished;}catch{}
+        section.dataset.opening='false';
+        section.dataset.openFallback='single-scene-kept-visible';
+        return;
+      }
       const animation=section.animate([{opacity:1,transform:'translateY(0)'},{opacity:.94,offset:.28},{opacity:0,transform:'translateY(-100%)'}],{duration:1500,easing:'cubic-bezier(.22,1,.36,1)',fill:'forwards'});
       try{await animation.finished;}catch{}
-      section.style.visibility='hidden';section.style.pointerEvents='none';
+      section.style.display='none';
+      nextScene.scrollIntoView({behavior:'smooth',block:'start'});
+      nextScene.classList.add('is-active');
     };
   });
 }
@@ -139,11 +149,7 @@ function markReferenceCover(project,regression){
   });
 }
 
-async function outputTrace(source,result){
-  const output=result?.transformed?.compositeSrc||result?.transformed?.layers?.[0]?.src||'';
-  if(!output)return {state:'NO OUTPUT'};if(output===source)return {state:'SOURCE REUSED'};
-  return {state:'GENERATED / CHANGED'};
-}
+async function outputTrace(source,result){const output=result?.transformed?.compositeSrc||result?.transformed?.layers?.[0]?.src||'';if(!output)return {state:'NO OUTPUT'};if(output===source)return {state:'SOURCE REUSED'};return {state:'GENERATED / CHANGED'};}
 
 async function updateProvider(panel){
   const status=providerStatus(),target=panel.querySelector('[data-art-provider]');
@@ -162,29 +168,26 @@ async function run(panel){
   ['[data-art-output]','[data-art-handoff]','[data-art-fidelity]','[data-art-final-qa]'].forEach(s=>setText(panel,s,'WAITING'));
   setState(panel,'loading','Reference analyze → artwork-only transform → source fidelity check → native layers → opening motion → regression');
   try{
+    const baseProject=currentStudioProject()?clone(currentStudioProject()):null;
     const sourceStructure=await analyzeStructure(sourceUrl);
     const result=await engine.run({source:sourceUrl,presetId,names:'Anif & Dini',guest:'Tamu Undangan'});
     const generatedSrc=result?.transformed?.compositeSrc||result?.transformed?.layers?.find(l=>l?.src)?.src||'';
     if(!generatedSrc)throw new Error('Provider tidak mengembalikan artwork');
     const outputStructure=await analyzeStructure(generatedSrc),fidelity=compareStructure(sourceStructure,outputStructure),trace=await outputTrace(sourceUrl,result);
-    const mountedProject=result.transformed.fallback?result.project:normalizeReferenceProject(result,generatedSrc,fidelity);
+    const mountedProject=result.transformed.fallback?result.project:normalizeReferenceProject(result,generatedSrc,fidelity,baseProject);
     const regression=finalRegression(result,trace,fidelity),cover=mountedProject?.scenes?.find(s=>s.type==='cover')||mountedProject?.scenes?.[0];
-    if(cover)cover.finalReferenceRegression=regression;if(mountedProject.generator)mountedProject.generator.finalReferenceRegression=regression;
-    result.project=mountedProject;
+    if(cover)cover.finalReferenceRegression=regression;if(mountedProject.generator)mountedProject.generator.finalReferenceRegression=regression;result.project=mountedProject;
 
     setText(panel,'[data-art-analysis]',`${result.analysis.width}×${result.analysis.height} · H ${Math.round(result.analysis.horizonY*100)}%`);
-    setText(panel,'[data-art-layout]','ARTWORK PLATE + NATIVE UI');setText(panel,'[data-art-qa]',`${result.quality.score} · ${result.quality.status.toUpperCase()}`);
-    setText(panel,'[data-art-adapter]',result.prompt?.themeAdapter||result.transformed.prompt?.themeAdapter||'-');
-    setText(panel,'[data-art-prompt]',result.prompt?.version||MASTER_TRANSFORM_PROMPT_VERSION);
+    setText(panel,'[data-art-layout]',mountedProject?.scenes?.length>1?'ARTWORK PLATE + NATIVE UI + CONTENT':'ARTWORK PLATE + NATIVE UI');setText(panel,'[data-art-qa]',`${result.quality.score} · ${result.quality.status.toUpperCase()}`);
+    setText(panel,'[data-art-adapter]',result.prompt?.themeAdapter||result.transformed.prompt?.themeAdapter||'-');setText(panel,'[data-art-prompt]',result.prompt?.version||MASTER_TRANSFORM_PROMPT_VERSION);
     const meta=result.transformed.providerMeta||{};if(meta.model)setText(panel,'[data-art-model]',meta.model);if(meta.revision)setText(panel,'[data-art-backend]',meta.revision);setText(panel,'[data-art-fallback]',meta.fallbackUsed?'YES':'NO');
-    setText(panel,'[data-art-output]',trace.state);setText(panel,'[data-art-handoff]',result.transformed.fallback?'FALLBACK':`REFERENCE · ${STAGE_REVISION}`);
-    setText(panel,'[data-art-fidelity]',`S ${fidelity.score} · C ${fidelity.center} · H ${fidelity.horizon}`);setText(panel,'[data-art-style-delta]',String(fidelity.styleDelta));
-    setText(panel,'[data-art-layers]',String(cover?.layers?.length||0));setText(panel,'[data-art-final-qa]',`${regression.score} · ${regression.status.toUpperCase()}`);
+    setText(panel,'[data-art-output]',trace.state);setText(panel,'[data-art-handoff]',result.transformed.fallback?'FALLBACK':`REFERENCE · ${STAGE_REVISION}`);setText(panel,'[data-art-fidelity]',`S ${fidelity.score} · C ${fidelity.center} · H ${fidelity.horizon}`);setText(panel,'[data-art-style-delta]',String(fidelity.styleDelta));setText(panel,'[data-art-layers]',String(cover?.layers?.length||0));setText(panel,'[data-art-final-qa]',`${regression.score} · ${regression.status.toUpperCase()}`);
 
     window.weddingEditor.setProject(mountedProject);window.weddingEngine.mount(mountedProject);markReferenceCover(mountedProject,regression);installResponsiveGuard(mountedProject);installCoverOpening(mountedProject);window.weddingEngine.playIntro?.();
     window.weddingAutoArtworkLastRun=result;window.weddingAutoArtworkFidelity=fidelity;window.weddingAutoArtworkFinalQA=regression;window.weddingAutoArtworkHandoff=STAGE_REVISION;
-    panel.querySelector('[data-art-note]').textContent=`#10.10J–N aktif: AI hanya mengubah gaya artwork; komposisi source dikunci. Native text/CTA terpisah, generated decor OFF, opening motion 1500ms, regression ${regression.score}/100.`;
-    setState(panel,regression.status==='locked'?'ready':'warning',regression.status==='locked'?'REFERENCE PIPELINE LOCKED · siap dilihat':`Regression ${regression.score}/100 · ${regression.issues.join(', ')||'warning'}`);
+    panel.querySelector('[data-art-note]').textContent=`#10.10N.1: cover AI mengganti cover saja; ${Math.max(0,(mountedProject?.scenes?.length||1)-1)} post-cover scene dipertahankan. Single-scene fallback tidak lagi menggelapkan preview.`;
+    setState(panel,regression.status==='locked'?'ready':'warning',regression.status==='locked'?'REFERENCE PIPELINE LOCKED · opening safe':`Regression ${regression.score}/100 · ${regression.issues.join(', ')||'warning'}`);
   }catch(error){console.error('[Auto Artwork Transform]',error);const message=error?.message||'Artwork transform failed';setState(panel,'error',message);['[data-art-output]','[data-art-handoff]','[data-art-fidelity]','[data-art-final-qa]'].forEach(s=>setText(panel,s,'ERROR'));panel.querySelector('[data-art-note]').textContent=message;}
   finally{button.disabled=false;button.textContent='AUTO CREATE ARTWORK';await updateProvider(panel);}
 }
@@ -200,7 +203,7 @@ function boot(){
   panel.querySelector('[data-art-run]').addEventListener('click',()=>run(panel));updateProvider(panel);
   window.weddingAutoArtwork={engine,provider:defaultProvider,run:options=>engine.run(options),version:ARTWORK_ENGINE_VERSION,promptVersion:MASTER_TRANSFORM_PROMPT_VERSION,stageRevision:STAGE_REVISION,referenceArchitecture:true};
   const header=document.querySelector('.brand-wrap span');if(header)header.textContent=`Reference Architecture · Stage #${STAGE_REVISION}`;
-  const checkpoint=document.querySelector('.checkpoint');if(checkpoint)checkpoint.textContent=`#${STAGE_REVISION} Source Fidelity · Native Layers · Motion · Final Regression`;
+  const checkpoint=document.querySelector('.checkpoint');if(checkpoint)checkpoint.textContent=`#${STAGE_REVISION} Opening Safe · Preserve Post-Cover Scenes`;
 }
 
 window.addEventListener('pagehide',()=>{responsiveObserver?.disconnect?.();revoke();},{once:true});

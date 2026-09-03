@@ -1,29 +1,6 @@
 import { LAYER_STACK, createLayerHost, groupSceneLayers } from '../layers/layer-system.js';
 import { createAtmosphere, createProceduralBackground, decorateSceneMetadata } from '../scenes/scene-composer.js';
-
-function createProceduralGunungan(layer, el) {
-  el.classList.add('procedural-gunungan');
-  el.innerHTML = `
-    <svg viewBox="0 0 240 360" aria-hidden="true" focusable="false">
-      <defs>
-        <linearGradient id="gununganFill-${layer.id}" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="currentColor" stop-opacity=".34"/>
-          <stop offset="1" stop-color="currentColor" stop-opacity=".08"/>
-        </linearGradient>
-      </defs>
-      <g class="gunungan-pulse">
-        <path d="M120 16C93 58 58 102 44 158c-14 55-5 111 20 151h112c25-40 34-96 20-151C182 102 147 58 120 16Z" fill="url(#gununganFill-${layer.id})" stroke="currentColor" stroke-opacity=".48" stroke-width="2"/>
-        <path d="M120 55c-18 30-43 65-52 105-9 39-3 79 14 109h76c17-30 23-70 14-109-9-40-34-75-52-105Z" fill="none" stroke="currentColor" stroke-opacity=".30" stroke-width="1.5"/>
-        <path d="M120 96v170M82 192c21-14 55-14 76 0M90 226c17-10 43-10 60 0" fill="none" stroke="currentColor" stroke-opacity=".34" stroke-width="1.5"/>
-        <circle cx="120" cy="152" r="26" fill="none" stroke="currentColor" stroke-opacity=".34" stroke-width="1.5"/>
-        <path d="M103 152c10-16 24-16 34 0-10 16-24 16-34 0Z" fill="currentColor" fill-opacity=".14"/>
-      </g>
-      <g class="gunungan-orbit" opacity=".34">
-        <circle cx="120" cy="152" r="43" fill="none" stroke="currentColor" stroke-dasharray="2 7"/>
-      </g>
-      <path d="M70 309h100M88 326h64" stroke="currentColor" stroke-opacity=".38" stroke-width="2" stroke-linecap="round"/>
-    </svg>`;
-}
+import { hasProceduralAsset, renderProceduralAsset } from '../assets/procedural-assets.js';
 
 function applyMotion(layer, el) {
   const motion = layer.motion || {};
@@ -41,6 +18,18 @@ function applyMotion(layer, el) {
     el.dataset.decorMotion = decorMotion;
     el.style.setProperty('--decor-duration', `${motion.decorDurationMs ?? 7200}ms`);
   }
+}
+
+function mountProceduralAsset(layer, el, generator) {
+  el.classList.add('procedural-asset', `procedural-${generator}`);
+  el.dataset.generator = generator;
+  const options = {
+    id: layer.id || generator,
+    seed: layer.asset?.seed || layer.seed || layer.id || generator,
+    variant: layer.asset?.variant || layer.variant || 'soft',
+    count: layer.asset?.count || layer.particle?.density
+  };
+  el.innerHTML = renderProceduralAsset(generator, options);
 }
 
 function createLayer(layer = {}) {
@@ -81,16 +70,23 @@ function createLayer(layer = {}) {
       el.appendChild(button);
       break;
     }
-    case 'particle':
-      el.classList.add('layer-particle');
-      el.dataset.particle = layer.particle?.type || layer.preset || 'gold-dust';
+    case 'particle': {
+      const generator = layer.asset?.generator || layer.particle?.type;
+      if (generator && hasProceduralAsset(generator)) {
+        el.classList.add('layer-particle');
+        mountProceduralAsset(layer, el, generator);
+      } else {
+        el.classList.add('layer-particle');
+        el.dataset.particle = layer.particle?.type || layer.preset || 'gold-dust';
+      }
       if (layer.particle?.opacity != null) el.style.opacity = layer.particle.opacity;
       break;
+    }
     case 'decor': {
       el.classList.add('layer-decor');
       const generator = layer.asset?.generator || layer.asset?.type || layer.preset || 'procedural';
       el.dataset.decor = generator;
-      if (generator === 'gunungan') createProceduralGunungan(layer, el);
+      if (hasProceduralAsset(generator)) mountProceduralAsset(layer, el, generator);
       break;
     }
     case 'image': {

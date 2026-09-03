@@ -16,33 +16,52 @@ Private experimental studio for building reusable wedding invitation templates w
 11. Variation System
 12. Export + Production Hardening
 
-## Final post-V1 reference checkpoint
-**Stage #10.10N — Reference Architecture Final Regression**
+## Active post-V1 direction
+**Stage #11 — Reference-Locked Native Rebuild**
 
-Stages #10.10J–#10.10N replace the previous poster-style generated-cover approach.
+Target reference: `ART JAWA COKLAT 3`
 
-### J — Reference Architecture Recovery
-The cover is modeled as an artwork plate plus native HTML/DOM typography and CTA. Generated artwork is not treated as a complete wedding poster.
+The earlier #10.10J–#10.10N work proved the artwork-only/source-fidelity path, but it is no longer considered the final page architecture. The next production target is a native section-by-section reconstruction of the supplied reference rather than a generated cover followed by generic Studio scenes.
 
-### K — Artwork-Only Transform Lock
-Cloudflare Workers AI / FLUX receives the source as a geometry contract. It must preserve the main subject, silhouette, camera/viewpoint, crop relationship, horizon, perspective and major object placement. It may transform rendering style into engraved/etched stationery artwork, but it must not invent a new scene, floral frame, arch, gunungan, joglo, border or typography.
+### #11.1 — Reference Structure Mapping — COMPLETE
 
-### L — Native Layer Composition
-The generated result is mounted as one isolated artwork image layer. `THE WEDDING OF`, couple names, recipient copy, guest name, `Di Tempat` and `Buka Undangan` remain separate native layers. Legacy generated/procedural decor is disabled on this final cover path.
+Runtime reference contract:
+`src/reference/art-jawa-coklat-3-reference-map.js`
 
-### M — Motion / Opening Fidelity
-The native CTA triggers a 1500 ms premium cover exit, dispatches `wedding:cover-open`, and attempts to start the existing `#song` audio element when available. Pixi remains a presentation layer for artwork; Konva selection overlay is disabled for the final cover.
+Blueprint:
+`docs/STAGE-11.1-REFERENCE-STRUCTURE-MAPPING.md`
 
-### N — Final Reference Regression
-Before reporting a final candidate, the Studio analyzes source and generated artwork structure and compares row/column edge profiles, subject center and horizon. The panel reports source fidelity, style delta and a final regression score. A high score is reported as `LOCKED`; drift is surfaced instead of silently calling the result stable.
+Mapped source flow:
+1. Cover
+2. Opening Motion
+3. Couple Introduction
+4. Save The Date / Quote
+5. Wedding Event — Akad + Resepsi
+6. Live Streaming
+7. Gallery Foto
+8. Love Story
+9. Wedding Gift
+10. RSVP
+11. Ucapan & Doa
+12. Closing
+13. Optional own-brand footer
 
-### Final success indicators
-A successful run should show:
-- `REFERENCE · 10.10N`
-- backend revision `10.10K-source-fidelity-lock`
-- Source Fidelity values for structure / center / horizon
-- non-zero Style Delta
-- Final Regression `LOCKED`
-- status `REFERENCE PIPELINE LOCKED · siap dilihat`
+Canonical reference media identified:
+- `download.png` recurring artwork plate
+- `download-1.png` secondary/couple accent artwork
+- `JAWA-COKLAT-3-1.mp4` opening cinematic motion
 
-The final architecture is intentionally conservative: AI transforms artwork style only; composition, wedding copy, CTA, motion and editor/runtime behavior remain under deterministic Studio control.
+Motion intent is mapped from Elementor vocabulary into native Studio presets. Source branding is reference-only and must not be copied into production.
+
+## Stage 11 remaining roadmap
+
+- #11.2 Visual DNA Extraction
+- #11.3 Section Blueprint Rewrite
+- #11.4 Native Scene Reconstruction
+- #11.5 Editable Data Binding
+- #11.6 Motion Choreography Match
+- #11.7 Fidelity QA
+
+## Architecture rule
+
+Reference first. Native Studio reconstruction second. AI is limited to artwork transformation and must not invent the page structure, section order, floral frame, wedding cards, typography, CTA placement, or post-cover scenes.

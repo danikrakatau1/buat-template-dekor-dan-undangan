@@ -1,3 +1,4 @@
+import '../stage9-6.js';
 import { resolveThemeVariation } from './preset-rules.js';
 import { createJawaFidelityProject } from '../art-direction/jawa-composition-variants.js';
 

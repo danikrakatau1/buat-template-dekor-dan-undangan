@@ -16,6 +16,17 @@ const widthNumber=value=>Number.parseFloat(String(value ?? '0').replace('%',''))
 const getLayer=(scene,id)=>scene?.layers?.find(layer=>layer.id===id);
 const unique=items=>[...new Set(items)];
 
+function syncCheckpointUI(){
+  const brand=document.querySelector('.brand-wrap span');
+  if(brand) brand.textContent='Final Fidelity Regression · Stage #9.9.6';
+  const loading=document.querySelector('.engine-loading');
+  if(loading) loading.textContent='Preparing Stage #9.9.6 final fidelity regression…';
+  const note=document.querySelector('.property-note');
+  if(note) note.textContent='Stage #9.9.6 closes the Stage #9.9 engineering pass with a 12-case regression across four Jawa compositions and three viewports, checking final registry parity, P0 artwork contracts, Pixi/DOM fallback safety and tuned cover geometry. Visual engraving quality remains a human QA gate.';
+  const checkpoint=document.querySelector('.checkpoint');
+  if(checkpoint) checkpoint.textContent='#9.9.6 Final Fidelity Regression Pass · 4 Compositions × 3 Viewports';
+}
+
 function sourceContract(layer){
   const asset=layer?.asset || {};
   return {
@@ -182,6 +193,7 @@ async function copyReport(panel){
 }
 
 function boot(){
+  syncCheckpointUI();
   const qaPanel=document.querySelector('.fidelity-qa-panel');
   if(!qaPanel || !window.weddingEditor){ setTimeout(boot,80); return; }
   document.querySelector('.reference-regression-panel')?.remove();

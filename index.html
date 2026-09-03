@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/src/styles.css" />
   <link rel="stylesheet" href="/src/stage4.css" />
   <link rel="stylesheet" href="/src/stage5.css" />
+  <link rel="stylesheet" href="/src/stage6.css" />
 </head>
 <body>
   <div id="app" class="studio-shell">
@@ -16,7 +17,7 @@
         <div class="brand-mark">W</div>
         <div>
           <strong>Wedding Template Studio</strong>
-          <span>Motion &amp; Decor Engine V1</span>
+          <span>Procedural Asset Engine V1</span>
         </div>
       </div>
       <div class="topbar-actions">
@@ -36,12 +37,13 @@
         <button class="nav-button active">Layers</button>
         <button class="nav-button">Assets</button>
         <button class="nav-button">Presets</button>
+        <div class="asset-library-badge">7 procedural generators ready</div>
       </section>
     </aside>
 
     <main class="canvas-area">
       <div class="canvas-toolbar">
-        <span>Live Motion Preview · Parallax + Decor + Timeline</span>
+        <span>Live Procedural Preview · SVG + CSS + Motion</span>
         <div class="device-switcher">
           <button class="device-button active" data-device="mobile">Mobile</button>
           <button class="device-button" data-device="tablet">Tablet</button>
@@ -52,7 +54,7 @@
       <div class="preview-stage">
         <div id="preview-frame" class="preview-frame mobile">
           <div id="engine-root" class="engine-root" aria-live="polite">
-            <div class="engine-loading">Loading motion engine…</div>
+            <div class="engine-loading">Generating procedural assets…</div>
           </div>
         </div>
       </div>
@@ -77,18 +79,18 @@
         <div class="chip-row">
           <button class="chip active">Glow</button>
           <button class="chip active">Dust</button>
-          <button class="chip">Grain</button>
+          <button class="chip active">Grain</button>
         </div>
       </div>
       <div class="property-note">
-        Stage #5 adds reusable motion presets, decor float/sway/breathe/drift, depth parallax, upgraded particles, Ken Burns-compatible dynamic backgrounds, and replayable intro motion.
+        Stage #6 adds a reusable procedural registry for gunungan, ornament frame, batik, wave, stars, mist, and glow. Assets are generated from SVG/CSS at runtime and remain theme-color aware.
       </div>
     </aside>
 
     <footer class="timeline-bar">
       <span>Timeline</span>
-      <div class="timeline-track"><i style="width:41.66%"></i></div>
-      <span class="checkpoint">#5 Motion &amp; Decor Engine</span>
+      <div class="timeline-track"><i style="width:50%"></i></div>
+      <span class="checkpoint">#6 Procedural Asset Engine</span>
     </footer>
   </div>
   <script type="module" src="/src/app.js"></script>

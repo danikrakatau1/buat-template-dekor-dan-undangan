@@ -9,15 +9,16 @@
   <link rel="stylesheet" href="/src/stage4.css" />
   <link rel="stylesheet" href="/src/stage5.css" />
   <link rel="stylesheet" href="/src/stage6.css" />
+  <link rel="stylesheet" href="/src/stage7.css" />
 </head>
-<body>
+<body data-theme-pack="jawa-luxury">
   <div id="app" class="studio-shell">
     <header class="topbar">
       <div class="brand-wrap">
         <div class="brand-mark">W</div>
         <div>
           <strong>Wedding Template Studio</strong>
-          <span>Procedural Asset Engine V1</span>
+          <span>Starter Theme Packs V1</span>
         </div>
       </div>
       <div class="topbar-actions">
@@ -37,13 +38,13 @@
         <button class="nav-button active">Layers</button>
         <button class="nav-button">Assets</button>
         <button class="nav-button">Presets</button>
-        <div class="asset-library-badge">7 procedural generators ready</div>
+        <div class="asset-library-badge">7 procedural generators · 3 theme packs</div>
       </section>
     </aside>
 
     <main class="canvas-area">
       <div class="canvas-toolbar">
-        <span>Live Procedural Preview · SVG + CSS + Motion</span>
+        <span>Live Theme Preview · Same Engine, Different Art Direction</span>
         <div class="device-switcher">
           <button class="device-button active" data-device="mobile">Mobile</button>
           <button class="device-button" data-device="tablet">Tablet</button>
@@ -54,43 +55,43 @@
       <div class="preview-stage">
         <div id="preview-frame" class="preview-frame mobile">
           <div id="engine-root" class="engine-root" aria-live="polite">
-            <div class="engine-loading">Generating procedural assets…</div>
+            <div class="engine-loading">Building theme pack…</div>
           </div>
         </div>
       </div>
     </main>
 
     <aside class="panel right-panel">
-      <div class="panel-title">Properties</div>
+      <div class="panel-title">Theme Pack</div>
       <div class="property-group">
         <label>Preset</label>
-        <select id="preset-select">
-          <option>Jawa Luxury</option>
-          <option>Ocean Romantic</option>
-          <option>Celestial Night</option>
-        </select>
+        <select id="preset-select"></select>
       </div>
       <div class="property-group">
         <label>Motion Level</label>
-        <input type="range" min="0" max="100" value="64" />
+        <input type="range" min="0" max="100" value="72" />
       </div>
       <div class="property-group">
         <label>Atmosphere</label>
         <div class="chip-row">
           <button class="chip active">Glow</button>
-          <button class="chip active">Dust</button>
-          <button class="chip active">Grain</button>
+          <button class="chip active">Ambient</button>
+          <button class="chip active">Depth</button>
         </div>
       </div>
       <div class="property-note">
-        Stage #6 adds a reusable procedural registry for gunungan, ornament frame, batik, wave, stars, mist, and glow. Assets are generated from SVG/CSS at runtime and remain theme-color aware.
+        Stage #7 packages the same visual engine into three distinct art directions: Jawa Luxury, Ocean Romantic, and Celestial Night. Switching preset rebuilds the scene from theme rules, not a copied HTML template.
+      </div>
+      <div class="theme-pack-note">
+        <strong>Theme Pack V1</strong>
+        Jawa = batik + gunungan · Ocean = glow + mist + layered waves · Celestial = seeded stars + cosmic glow.
       </div>
     </aside>
 
     <footer class="timeline-bar">
       <span>Timeline</span>
-      <div class="timeline-track"><i style="width:50%"></i></div>
-      <span class="checkpoint">#6 Procedural Asset Engine</span>
+      <div class="timeline-track"><i style="width:58.33%"></i></div>
+      <span class="checkpoint">#7 Starter Theme Packs</span>
     </footer>
   </div>
   <script type="module" src="/src/app.js"></script>

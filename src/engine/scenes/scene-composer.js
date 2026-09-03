@@ -33,4 +33,8 @@ export function decorateSceneMetadata(section, scene = {}) {
   section.dataset.sceneType = scene.type || 'generic';
   section.dataset.scenePreset = scene.preset || '';
   section.dataset.hasAtmosphere = String(Boolean(scene.atmosphere?.effects?.length));
+  section.dataset.layout = scene.variation?.layout || 'default';
+  section.dataset.variationSeed = scene.variation?.seed || '';
+  section.dataset.heroVariant = scene.variation?.heroVariant || '';
+  section.dataset.backgroundMotion = scene.variation?.backgroundMotion || scene.background?.kenBurns || '';
 }

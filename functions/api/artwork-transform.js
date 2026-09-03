@@ -1,6 +1,6 @@
 const PRIMARY_MODEL='@cf/black-forest-labs/flux-2-klein-9b';
 const FALLBACK_MODEL='@cf/black-forest-labs/flux-2-klein-4b';
-const REVISION='10.10E-flux-reference-edit';
+const REVISION='10.10K-source-fidelity-lock';
 
 function json(data,status=200,extraHeaders={}){
   return new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store',...extraHeaders}});
@@ -12,12 +12,12 @@ function modelConfig(env){
     fallback:env.WORKERS_AI_FALLBACK_MODEL??FALLBACK_MODEL,
     width:Math.round(numberEnv(env.WORKERS_AI_IMAGE_WIDTH,1024,256,1920)/64)*64,
     height:Math.round(numberEnv(env.WORKERS_AI_IMAGE_HEIGHT,1792,256,1920)/64)*64,
-    guidance:numberEnv(env.WORKERS_AI_IMAGE_GUIDANCE,4.5,1,20)
+    guidance:numberEnv(env.WORKERS_AI_IMAGE_GUIDANCE,3.2,1,20)
   };
 }
 
 function buildEditPrompt(positive,negative){
-  return `${positive}\n\nREFERENCE IMAGE INSTRUCTION:\nUse input_image_0 as the source composition and subject reference. Preserve the landmark/subject identity, silhouette, camera viewpoint and broad composition, but redraw the entire rendering style as premium antique engraved wedding stationery. Replace photographic pixels with etched contour lines, fine cross-hatching, engraved botanical detail, parchment-print texture and restrained muted color. This must be a visible style reconstruction, not a sepia filter.\n${negative?`\nAVOID / NEGATIVE CONSTRAINTS:\n${negative}`:''}`;
+  return `${positive}\n\nSOURCE FIDELITY LOCK — MANDATORY:\ninput_image_0 is the geometry contract. Perform STYLE TRANSFORMATION ONLY. Keep the same primary subject, same silhouette, same camera/viewpoint, same crop relationship, same horizon, same perspective, same object count, same object placement and same large negative-space regions. Do not redesign the scene. Do not invent a new wedding composition. Do not replace the landmark, mountain, building, person, tree line, water line, road or background with a different subject. Do not move a major subject to another area of the frame.\n\nARTWORK-ONLY RULE:\nConvert the existing visible pixels into refined antique engraved / etched / cross-hatched artwork with warm ivory paper character, restrained sepia-brown/olive/burgundy accents and fine print texture. This must look visibly illustrated rather than photographic, but geometry must remain recognizable.\n\nNO GENERATED DECOR RULE:\nDo NOT add a floral border, botanical frame, carved arch, gunungan, joglo, decorative corner, wreath, ribbon, stationery border or extra flowers unless that exact structural element already exists in the source image. Decorative framing, cultural ornaments, typography and CTA are added later by the Studio as separate native layers.\n\nTEXTLESS RULE:\nAbsolutely no letters, words, signs, handwriting, calligraphy, typography, labels, logos, watermarks, pseudo-text or readable characters anywhere in the generated artwork. Any sign or text-bearing surface from the source should become blank engraved texture while preserving its shape.\n\nSUCCESS CRITERIA:\nA viewer must immediately recognize this as the SAME source scene and SAME composition, only redrawn in premium vintage engraving language.\n${negative?`\nAVOID / NEGATIVE CONSTRAINTS:\n${negative}, new composition, new border, new frame, added flowers, added ornaments, changed camera angle, changed crop, changed horizon, replaced landmark, invented architecture, invented mountain, generated text, pseudo-text`:''}`;
 }
 
 async function runFluxReference(env,model,{image,prompt,width,height,guidance}){
@@ -43,7 +43,7 @@ function resultImageBase64(result){
 export async function onRequestGet({env}){
   const config=modelConfig(env);
   const configured=Boolean(env.AI?.run);
-  return json({ok:true,configured,provider:'cloudflare-workers-ai',model:config.primary,fallbackModel:config.fallback||'',mode:'reference-edit',generation:{width:config.width,height:config.height,guidance:config.guidance,steps:4,inputTransport:'multipart/input_image_0'},revision:REVISION,message:configured?'Workers AI binding active':'Add a Workers AI binding named AI to this Cloudflare Pages project'});
+  return json({ok:true,configured,provider:'cloudflare-workers-ai',model:config.primary,fallbackModel:config.fallback||'',mode:'reference-edit-source-fidelity',generation:{width:config.width,height:config.height,guidance:config.guidance,steps:4,inputTransport:'multipart/input_image_0'},revision:REVISION,message:configured?'Workers AI binding active · source fidelity lock enabled':'Add a Workers AI binding named AI to this Cloudflare Pages project'});
 }
 
 export async function onRequestPost({request,env}){
@@ -77,5 +77,5 @@ export async function onRequestPost({request,env}){
   const b64=resultImageBase64(result);
   if(!b64) return json({error:{code:'empty_output',message:'FLUX Workers AI tidak mengembalikan field image base64 yang diharapkan.'},provider:'cloudflare-workers-ai',model,revision:REVISION},502);
   const compositeSrc=`data:image/png;base64,${b64}`;
-  return json({ok:true,provider:'cloudflare-workers-ai',model,fallbackModel:config.fallback||'',fallbackUsed,revision:REVISION,generatedAt:new Date().toISOString(),promptVersion,preset,themeAdapter,reference:{width:referenceWidth,height:referenceHeight,resized:referenceResized},generation:{width:config.width,height:config.height,guidance:config.guidance,steps:4,inputTransport:'multipart/input_image_0'},compositeSrc,layers:[{id:'ai-transformed-base',role:'background',src:compositeSrc,depth:.02,transparent:false,transform:{x:50,y:50,width:'112%',opacity:1}}]});
+  return json({ok:true,provider:'cloudflare-workers-ai',model,fallbackModel:config.fallback||'',fallbackUsed,revision:REVISION,generatedAt:new Date().toISOString(),promptVersion,preset,themeAdapter,reference:{width:referenceWidth,height:referenceHeight,resized:referenceResized},generation:{width:config.width,height:config.height,guidance:config.guidance,steps:4,inputTransport:'multipart/input_image_0',sourceFidelityLock:true,artworkOnly:true,textless:true},compositeSrc,layers:[{id:'ai-transformed-base',role:'background',src:compositeSrc,depth:.02,transparent:false,transform:{x:50,y:50,width:'100%',opacity:1}}]});
 }

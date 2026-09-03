@@ -16,30 +16,33 @@ Private experimental studio for building reusable wedding invitation templates w
 11. Variation System
 12. Export + Production Hardening
 
-## Stable post-V1 checkpoint
-**Stage #10.10I — Auto Artwork Transform V1 Stable**
+## Final post-V1 reference checkpoint
+**Stage #10.10N — Reference Architecture Final Regression**
 
-Final pipeline:
-- source image analysis and composition locks
-- Master Transform Prompt V1 with theme adapters and strict textless-artwork guard
-- Cloudflare Workers AI reference-edit provider path
-- provider output tracing and source-reuse detection
-- generated artwork full-bleed handoff with legacy decor isolation
-- clean DOM typography layer separated from generated artwork
-- output-artwork density analysis after generation
-- automatic Top Copy / Center Copy / Bottom Copy selection
-- CTA density scoring and collision guard
-- responsive portrait / compact / landscape presentation guard
-- Pixi/GSAP presentation integration with Konva editor overlay disabled for final generated covers
-- engine quality gate plus final layout QA score
-- source-preserving fallback when the generative provider is unavailable
+Stages #10.10J–#10.10N replace the previous poster-style generated-cover approach.
 
-The generative provider is never treated as successful merely because the endpoint is reachable. A generated candidate is traced, analyzed again, normalized into Scene JSON, mounted as the final artwork layer, and then independently checked for layout quality before the Studio reports a stable result.
+### J — Reference Architecture Recovery
+The cover is modeled as an artwork plate plus native HTML/DOM typography and CTA. Generated artwork is not treated as a complete wedding poster.
 
-### Stable success indicators
-A successful final run should show:
-- `OUTPUT-AWARE · 10.10I`
-- an output layout such as `top-copy`, `center-copy`, or `bottom-copy`
-- density values for copy and CTA lanes
-- `Final QA` score/status
-- `Auto Artwork Transform V1 stable · output-aware layout ready` when the final QA reaches stable status
+### K — Artwork-Only Transform Lock
+Cloudflare Workers AI / FLUX receives the source as a geometry contract. It must preserve the main subject, silhouette, camera/viewpoint, crop relationship, horizon, perspective and major object placement. It may transform rendering style into engraved/etched stationery artwork, but it must not invent a new scene, floral frame, arch, gunungan, joglo, border or typography.
+
+### L — Native Layer Composition
+The generated result is mounted as one isolated artwork image layer. `THE WEDDING OF`, couple names, recipient copy, guest name, `Di Tempat` and `Buka Undangan` remain separate native layers. Legacy generated/procedural decor is disabled on this final cover path.
+
+### M — Motion / Opening Fidelity
+The native CTA triggers a 1500 ms premium cover exit, dispatches `wedding:cover-open`, and attempts to start the existing `#song` audio element when available. Pixi remains a presentation layer for artwork; Konva selection overlay is disabled for the final cover.
+
+### N — Final Reference Regression
+Before reporting a final candidate, the Studio analyzes source and generated artwork structure and compares row/column edge profiles, subject center and horizon. The panel reports source fidelity, style delta and a final regression score. A high score is reported as `LOCKED`; drift is surfaced instead of silently calling the result stable.
+
+### Final success indicators
+A successful run should show:
+- `REFERENCE · 10.10N`
+- backend revision `10.10K-source-fidelity-lock`
+- Source Fidelity values for structure / center / horizon
+- non-zero Style Delta
+- Final Regression `LOCKED`
+- status `REFERENCE PIPELINE LOCKED · siap dilihat`
+
+The final architecture is intentionally conservative: AI transforms artwork style only; composition, wedding copy, CTA, motion and editor/runtime behavior remain under deterministic Studio control.

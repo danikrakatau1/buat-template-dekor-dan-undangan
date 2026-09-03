@@ -27,7 +27,7 @@ export function composeRoyalJogloGarden({ names='Anif & Dini', eyebrow='THE WEDD
   return {
     id:'cover', type:'cover', preset:'jawa-heritage-floral-royal-joglo-garden',
     fidelity:{ system:'hd-vector-layered', composition:'royal-joglo-garden', seed, manifestReady:manifest.valid, assetIds:[...ROYAL_JOGLO_GARDEN_ASSETS] },
-    background:{ type:'static', transition:'cinematic-crossfade', durationMs:9000, transitionMs:1600, kenBurns:'zoom-in' },
+    background:{ type:'procedural', transition:'cinematic-crossfade', durationMs:9000, transitionMs:1600, kenBurns:'zoom-in' },
     atmosphere:{ effects:['glow','vignette','grain'], intensity:.22 },
     timeline:[
       {at:80,target:'paper-parchment-cream-01',action:'reveal'},

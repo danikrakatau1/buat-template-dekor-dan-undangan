@@ -4,6 +4,7 @@ import { createVariationSeed } from './themes/preset-rules.js';
 import { generateAutoTemplate, summarizeGeneratedTemplate } from './generator/auto-template-generator.js';
 import { VisualEditor } from './editor/visual-editor.js';
 import { createVariationProject, summarizeVariation } from './variation/variation-system.js';
+import { getProductionReport, exportProjectJSON, exportRunnableHTML } from './production/export-manager.js';
 
 const scenes = ['Cover','Couple','Event','Story','Gallery','RSVP','Closing'];
 const sceneList = document.querySelector('#scene-list');
@@ -47,6 +48,16 @@ const variationLockCount = document.querySelector('#variation-lock-count');
 const variationSourceSeed = document.querySelector('#variation-source-seed');
 const variationCurrentSeed = document.querySelector('#variation-current-seed');
 
+const productionStatus = document.querySelector('#production-status');
+const productionDot = document.querySelector('#production-dot');
+const productionScenes = document.querySelector('#production-scenes');
+const productionLayers = document.querySelector('#production-layers');
+const productionWarnings = document.querySelector('#production-warnings');
+const productionMessage = document.querySelector('#production-message');
+const validateProductionButton = document.querySelector('#validate-production');
+const exportJSONButton = document.querySelector('#export-project-json');
+const exportHTMLButton = document.querySelector('#export-runnable-html');
+
 const engine = new WeddingVisualEngine({ root: previewRoot });
 window.weddingEngine = engine;
 let currentSeed = 'JL-DEMO-001';
@@ -69,6 +80,21 @@ function updateVariationLockUI(){
   if (variationLockCount) variationLockCount.textContent = `${count} locked`;
 }
 
+function updateProductionReport(project=currentProject){
+  const report = getProductionReport(project);
+  if (productionStatus) productionStatus.textContent = report.status;
+  if (productionScenes) productionScenes.textContent = String(report.sceneCount);
+  if (productionLayers) productionLayers.textContent = String(report.layerCount);
+  if (productionWarnings) productionWarnings.textContent = String(report.warnings.length);
+  if (productionDot) productionDot.dataset.state = report.ok ? (report.warnings.length ? 'warning' : 'ready') : 'error';
+  if (productionMessage) {
+    productionMessage.textContent = report.ok
+      ? (report.warnings.length ? report.warnings.slice(0,2).join(' ') : 'Schema, scene IDs, layer IDs and core transform values passed production validation.')
+      : report.errors.slice(0,2).join(' ');
+  }
+  return report;
+}
+
 function updateInspector(project){
   const variation = project.variation || {};
   const summary = summarizeGeneratedTemplate(project);
@@ -83,6 +109,7 @@ function updateInspector(project){
   if (variationSourceSeed) variationSourceSeed.textContent = variationSummary.sourceSeed;
   if (variationCurrentSeed) variationCurrentSeed.textContent = variationSummary.seed;
   document.body.dataset.variationActive = project.variationSystem ? 'true' : 'false';
+  updateProductionReport(project);
 }
 
 function markSelection(){
@@ -109,7 +136,11 @@ function renderLayerBrowser(sceneId=activeEditorScene){
     const button = document.createElement('button');
     button.type = 'button';
     button.classList.toggle('active', editor.selection?.sceneId === sceneId && editor.selection?.layerId === layer.id);
-    button.innerHTML = `<span>${layer.id}</span><em>${layer.kind || 'layer'}</em>`;
+    const name = document.createElement('span');
+    name.textContent = layer.id;
+    const kind = document.createElement('em');
+    kind.textContent = layer.kind || 'layer';
+    button.append(name, kind);
     button.addEventListener('click', () => editor.select(sceneId, layer.id));
     layerBrowser.appendChild(button);
   }
@@ -146,7 +177,7 @@ function renderEditedProject(){
     renderLayerBrowser(activeEditorScene);
     fillEditorFields(editor.getSelectedLayer());
     markSelection();
-    statusBadge.textContent = 'Editor Updated';
+    statusBadge.textContent = 'Production Updated';
     statusBadge.dataset.state = 'ready';
   });
 }
@@ -157,13 +188,13 @@ const editor = new VisualEditor({
     fillEditorFields(layer);
     renderLayerBrowser(activeEditorScene);
     markSelection();
-    statusBadge.textContent = layer ? 'Layer Selected' : 'Variation Ready';
+    statusBadge.textContent = layer ? 'Layer Selected' : 'Production Ready';
   },
   onChange: renderEditedProject
 });
 window.weddingEditor = editor;
 
-function mountProject(project, status='Variation Ready'){
+function mountProject(project, status='Production Ready'){
   currentProject = editor.setProject(project);
   currentSeed = currentProject.project.seed;
   engine.mount(currentProject);
@@ -180,7 +211,7 @@ function mountProject(project, status='Variation Ready'){
 }
 
 function mountTheme(themeId, seed=currentSeed){
-  return mountProject(createThemeProject(themeId, seed), 'Variation Ready');
+  return mountProject(createThemeProject(themeId, seed), 'Production Ready');
 }
 
 function buildSceneNavigation(){
@@ -252,11 +283,7 @@ function createControlledVariation(){
   statusBadge.textContent = 'Preserving Edits';
   statusBadge.dataset.state = 'loading';
   try {
-    const project = createVariationProject({
-      project:sourceProject,
-      themeId:presetSelect.value,
-      locks
-    });
+    const project = createVariationProject({ project:sourceProject, themeId:presetSelect.value, locks });
     mountProject(project, 'Controlled Variation');
     engine.playIntro();
   } catch (error) {
@@ -286,6 +313,13 @@ function updateSelectedFromControls(){
   });
 }
 
+function runProductionValidation(){
+  const report = updateProductionReport(editor.getProject());
+  statusBadge.textContent = report.ok ? 'Validation Passed' : 'Validation Blocked';
+  statusBadge.dataset.state = report.ok ? 'ready' : 'error';
+  return report;
+}
+
 buildSceneNavigation();
 fillThemeOptions();
 updateVariationLockUI();
@@ -308,6 +342,31 @@ for (const lock of [lockContent, lockLayout, lockMotion, lockAssets]) {
 }
 
 controlledVariationButton?.addEventListener('click', createControlledVariation);
+validateProductionButton?.addEventListener('click', runProductionValidation);
+exportJSONButton?.addEventListener('click', () => {
+  try {
+    const report = runProductionValidation();
+    if (!report.ok) return;
+    exportProjectJSON(editor.getProject());
+    statusBadge.textContent = 'JSON Exported';
+  } catch (error) {
+    console.error('[Production Export]', error);
+    statusBadge.textContent = 'Export Blocked';
+    statusBadge.dataset.state = 'error';
+  }
+});
+exportHTMLButton?.addEventListener('click', () => {
+  try {
+    const report = runProductionValidation();
+    if (!report.ok) return;
+    exportRunnableHTML(editor.getProject(), { engineBaseURL:location.origin });
+    statusBadge.textContent = 'Runnable Exported';
+  } catch (error) {
+    console.error('[Production Export]', error);
+    statusBadge.textContent = 'Export Blocked';
+    statusBadge.dataset.state = 'error';
+  }
+});
 
 editorReplay?.addEventListener('click', () => {
   const selection = editor.selection;
@@ -349,16 +408,14 @@ replayButton?.addEventListener('click', () => {
 });
 
 engine.bus.on('engine:ready', ({ project }) => {
-  document.querySelector('.brand-wrap span').textContent = project.variationSystem
-    ? `Variation System V1 · ${project.project?.preset || 'custom'}`
-    : `Variation Ready · ${project.project?.preset || 'custom'}`;
+  document.querySelector('.brand-wrap span').textContent = `Production Candidate V1 · ${project.project?.preset || 'custom'}`;
 });
 engine.bus.on('scene:enter', ({ sceneId }) => {
   document.querySelectorAll('.scene-item').forEach(el => el.classList.toggle('active', el.dataset.sceneTarget === sceneId));
 });
 engine.bus.on('timeline:step', step => {
   statusBadge.textContent = step.label || step.action || `Timeline ${step.at || 0}ms`;
-  setTimeout(() => statusBadge.textContent = currentProject?.variationSystem ? 'Controlled Variation' : 'Variation Ready', 900);
+  setTimeout(() => statusBadge.textContent = 'Production Ready', 900);
 });
 engine.bus.on('motion:replay', () => { statusBadge.textContent = 'Motion Replay'; });
 
@@ -369,7 +426,14 @@ try {
   console.error('[Wedding Visual Engine]', error);
   statusBadge.textContent = 'Engine Error';
   statusBadge.dataset.state = 'error';
-  previewRoot.innerHTML = `<div class="engine-error"><strong>Preview gagal dimuat.</strong><span>${error.message}</span></div>`;
+  const box = document.createElement('div');
+  box.className = 'engine-error';
+  const title = document.createElement('strong');
+  title.textContent = 'Preview gagal dimuat.';
+  const detail = document.createElement('span');
+  detail.textContent = error?.message || String(error);
+  box.append(title, detail);
+  previewRoot.replaceChildren(box);
 }
 
-console.info('[Wedding Template Studio] Stage #11 Variation System booting.');
+console.info('[Wedding Template Studio] Stage #12 Export + Production Hardening booting.');
